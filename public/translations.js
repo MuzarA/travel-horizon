@@ -105,7 +105,7 @@
       form: {
         title: 'Where should we reply?', name: 'Your name', contact: 'Telegram, WhatsApp or email', country: 'Country (optional)', month: 'When (optional)', monthHint: 'For example: July 2027',
         group: 'Travellers (optional)', note: 'Anything we should know? (optional)', send: 'Send request', sending: 'Sending…',
-        success: 'Thank you! A person from our team will write to you soon.', error: 'We could not send it right now. Please write to us directly:',
+        success: 'Thank you! A person from our team will write to you soon.', error: 'We could not send it right now. Please write to us directly:', retry: 'We could not send it right now. Please try again in a minute.', check: 'Please check the marked field.', groupHint: 'Travellers must be a number from 1 to 99.',
         invalid: 'Please add your name and a way to contact you.', privacy: 'We use these details only to reply to you.', close: 'Close',
         messageHost: 'Message to the host', required: 'required'
       },
@@ -205,7 +205,7 @@
       form: {
         title: 'Сизге кайда жооп беребиз?', name: 'Атыңыз', contact: 'Telegram, WhatsApp же e-mail', country: 'Өлкө (милдеттүү эмес)', month: 'Качан (милдеттүү эмес)', monthHint: 'Мисалы: 2027-жылдын июлу',
         group: 'Саякатчылар саны (милдеттүү эмес)', note: 'Дагы эмнени билишибиз керек? (милдеттүү эмес)', send: 'Суроо жөнөтүү', sending: 'Жөнөтүлүүдө…',
-        success: 'Рахмат! Биздин командадан бир адам жакында сизге жазат.', error: 'Азыр жөнөтүү мүмкүн болбоду. Бизге түз жазыңыз:',
+        success: 'Рахмат! Биздин командадан бир адам жакында сизге жазат.', error: 'Азыр жөнөтүү мүмкүн болбоду. Бизге түз жазыңыз:', retry: 'Азыр жөнөтүү мүмкүн болбоду. Бир мүнөттөн кийин кайра аракет кылыңыз.', check: 'Белгиленген талааны текшериңиз.', groupHint: 'Саякатчылардын саны 1ден 99га чейин болушу керек.',
         invalid: 'Атыңызды жана байланыш маалыматын жазыңыз.', privacy: 'Бул маалыматты сизге жооп берүү үчүн гана колдонобуз.', close: 'Жабуу',
         messageHost: 'Хостко билдирүү', required: 'милдеттүү'
       },
@@ -305,7 +305,7 @@
       form: {
         title: 'Куда вам ответить?', name: 'Ваше имя', contact: 'Telegram, WhatsApp или почта', country: 'Страна (необязательно)', month: 'Когда (необязательно)', monthHint: 'Например: июль 2027',
         group: 'Сколько человек (необязательно)', note: 'Что нам важно знать? (необязательно)', send: 'Отправить запрос', sending: 'Отправляем…',
-        success: 'Спасибо! Человек из нашей команды скоро вам напишет.', error: 'Сейчас не получилось отправить. Напишите нам напрямую:',
+        success: 'Спасибо! Человек из нашей команды скоро вам напишет.', error: 'Сейчас не получилось отправить. Напишите нам напрямую:', retry: 'Сейчас не получилось отправить. Попробуйте ещё раз через минуту.', check: 'Проверьте отмеченное поле.', groupHint: 'Количество путешественников — число от 1 до 99.',
         invalid: 'Укажите имя и способ связи.', privacy: 'Мы используем эти данные только чтобы ответить вам.', close: 'Закрыть',
         messageHost: 'Сообщение хосту', required: 'обязательно'
       },

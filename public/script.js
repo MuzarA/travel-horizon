@@ -703,6 +703,7 @@
     if (data.name.length < 1) bad.push('name');
     if (data.contact.length < 3) bad.push('contact');
     if (bad.length) { markInvalid(form, bad); statusMsg(form, 'error', esc(u.invalid)); return; }
+    if (data.group !== '' && !/^([1-9]|[1-9][0-9])$/.test(data.group)) { markInvalid(form, ['group']); statusMsg(form, 'error', esc(u.groupHint)); return; }
     markInvalid(form, []);
     data.kind = form.getAttribute('data-kind'); data.idea = form.getAttribute('data-idea'); data.hostId = form.getAttribute('data-host'); data.place = form.getAttribute('data-place');
     data.lang = state.lang; data.page = location.hash || '#top';
@@ -711,10 +712,15 @@
       form.querySelectorAll('input, textarea, button').forEach(function (el) { el.disabled = true; });
       btn.textContent = u.send;
       statusMsg(form, 'ok', icon('check') + ' ' + esc(u.success));
-    }).catch(function () {
+    }).catch(function (err) {
       btn.disabled = false; btn.textContent = u.send;
+      if (err && err.status === 400 && err.body && err.body.fields && err.body.fields.length) {
+        markInvalid(form, err.body.fields);
+        statusMsg(form, 'error', esc(err.body.fields.indexOf('group') >= 0 ? u.groupHint : u.check));
+        return;
+      }
       var links = contactLinks(content().contacts);
-      statusMsg(form, 'error', esc(u.error) + (links ? '<span class="direct">' + links + '</span>' : ''));
+      statusMsg(form, 'error', links ? esc(u.error) + '<span class="direct">' + links + '</span>' : esc(u.retry));
     });
   }
 
@@ -744,7 +750,8 @@
       btn.disabled = false; btn.textContent = b.send;
       if (err && err.body && err.body.fields) markInvalid(form, err.body.fields);
       var links = contactLinks(content().contacts);
-      statusMsg(form, 'error', esc(err && err.status === 400 ? b.invalid : ui().form.error) + (links && !(err && err.status === 400) ? '<span class="direct">' + links + '</span>' : ''));
+      if (err && err.status === 400) { statusMsg(form, 'error', esc(b.invalid)); return; }
+      statusMsg(form, 'error', links ? esc(ui().form.error) + '<span class="direct">' + links + '</span>' : esc(ui().form.retry));
     });
   }
 
