@@ -43,6 +43,17 @@
           { title: 'Travel with locals', text: 'Guides, yurt families and masters who live in these places show you around.' }
         ]
       },
+      why: {
+        kicker: 'Why Nomad Horizon', title: 'What makes travelling with us different',
+        items: [
+          { icon: 'globe', title: 'Three languages', text: 'The whole site in English, Kyrgyz and Russian — for travellers and for the locals who host them.' },
+          { icon: 'bolt', title: 'An idea in under a minute', text: 'Two questions in the planner give you a real route with stops and the best season.' },
+          { icon: 'user', title: 'A real person replies', text: 'Every request reaches our trip designers in Telegram. We aim to answer within 24 hours.' },
+          { icon: 'shield', title: 'Checked local hosts', text: 'Guides, yurt families and masters publish their own offers; we check each profile before it goes live.' },
+          { icon: 'compass', title: 'Ready for travellers from abroad', text: 'Visas, money, SIM cards and local customs explained, with links to official sources.' },
+          { icon: 'lock', title: 'Your data stays private', text: 'No tracking cookies. We use your contact only to reply to you.' }
+        ]
+      },
       hostsTeaser: { kicker: 'Local hosts', title: 'Meet the people who live here', sub: 'Guides, yurt families, drivers and craft masters publish their own offers. We check every profile; you talk to them directly.', become: 'Are you a local? Become a host' },
       planner: {
         kicker: 'Trip planner', title: 'Your first idea in under a minute', sub: 'Two questions. The rest we work out together.',
@@ -78,6 +89,7 @@
       },
       hostTypes: { guide: 'Mountain guide', yurt: 'Yurt stay', driver: 'Driver', horse: 'Horse trekking', craft: 'Craft workshop', food: 'Home cooking' },
       become: {
+        benefitsTitle: 'Why host with Nomad Horizon', benefits: [{ title: 'Free listing', text: 'Publishing your profile is free for now.' }, { title: 'A badge travellers trust', text: 'After our check your profile shows “Checked by Nomad Horizon”.' }, { title: 'Guests from abroad', text: 'Travellers from Europe, Asia and nearby countries find you in their language.' }, { title: 'You stay in charge', text: 'Guests write to you directly; you set your offer, dates and price.' }],
         kicker: 'For locals', title: 'Become a host', sub: 'Show travellers from abroad your valley, your yurt, your craft or your kitchen. Listing is free. We check every application and reply within a few days.',
         name: 'Your name', type: 'What do you offer?', region: 'Region', languages: 'Languages you speak', about: 'About you and your place', aboutHint: 'Write in Kyrgyz, Russian or English — we show travellers which language it is.', aboutLang: 'Language of this text',
         offerTitle: 'Offer title', offerTitleHint: 'For example: Two nights in our family yurt', duration: 'Duration', durationHint: 'For example: 1 day, 2 nights', price: 'Price from, USD (optional)',
@@ -89,7 +101,7 @@
         kicker: 'Before you go', title: 'Practical notes for travellers from abroad', sub: 'The basics we are asked most. Rules change, so always check the official sources linked here.',
         official: 'Official portal', updated: 'Checked: November 2026'
       },
-      contact: { kicker: 'Contact', title: 'Write to a real person', sub: 'Tell us roughly when and how you want to travel. We reply in English, Kyrgyz or Russian.', channels: 'Or write directly' },
+      contact: { reply: 'We aim to reply within 24 hours.', kicker: 'Contact', title: 'Write to a real person', sub: 'Tell us roughly when and how you want to travel. We reply in English, Kyrgyz or Russian.', channels: 'Or write directly' },
       form: {
         title: 'Where should we reply?', name: 'Your name', contact: 'Telegram, WhatsApp or email', country: 'Country (optional)', month: 'When (optional)', monthHint: 'For example: July 2027',
         group: 'Travellers (optional)', note: 'Anything we should know? (optional)', send: 'Send request', sending: 'Sending…',
@@ -131,6 +143,17 @@
           { title: 'Жергиликтүү адамдар менен саякаттаңыз', text: 'Ошол жерлерде жашаган гиддер, боз үйлүү үй-бүлөлөр жана усталар сизди тааныштырат.' }
         ]
       },
+      why: {
+        kicker: 'Эмне үчүн Nomad Horizon', title: 'Биз менен саякаттын айырмасы эмнеде',
+        items: [
+          { icon: 'globe', title: 'Үч тил', text: 'Сайт толугу менен англис, кыргыз жана орус тилдеринде — саякатчылар үчүн да, аларды кабыл алган жергиликтүүлөр үчүн да.' },
+          { icon: 'bolt', title: 'Бир мүнөткө жетпей идея', text: 'Пландоочудагы эки суроо аялдамалары жана ылайыктуу мезгили бар чыныгы маршрутту берет.' },
+          { icon: 'user', title: 'Чыныгы адам жооп берет', text: 'Ар бир суроо Telegram аркылуу саякат дизайнерлерибизге жетет. 24 сааттын ичинде жооп берүүгө аракет кылабыз.' },
+          { icon: 'shield', title: 'Текшерилген жергиликтүү хосттор', text: 'Гиддер, боз үйлүү үй-бүлөлөр жана усталар өз сунуштарын жарыялашат; ар бир профилди жарыяланганга чейин текшеребиз.' },
+          { icon: 'compass', title: 'Чет элдик саякатчыларга даяр', text: 'Виза, акча, SIM-карта жана жергиликтүү салттар расмий булактарга шилтемелер менен түшүндүрүлгөн.' },
+          { icon: 'lock', title: 'Маалыматыңыз корголгон', text: 'Көзөмөлдөөчү cookie жок. Байланышыңызды сизге жооп берүү үчүн гана колдонобуз.' }
+        ]
+      },
       hostsTeaser: { kicker: 'Жергиликтүү хосттор', title: 'Бул жерде жашаган адамдар менен таанышыңыз', sub: 'Гиддер, боз үйлүү үй-бүлөлөр, айдоочулар жана усталар өз сунуштарын жарыялашат. Биз ар бир профилди текшеребиз, сиз алар менен түз сүйлөшөсүз.', become: 'Жергиликтүүсүзбү? Хост болуңуз' },
       planner: {
         kicker: 'Саякат пландоочу', title: 'Алгачкы идея — бир мүнөткө жетпей', sub: 'Эки гана суроо. Калганын бирге ойлонобуз.',
@@ -166,6 +189,7 @@
       },
       hostTypes: { guide: 'Тоо гиди', yurt: 'Боз үйдө жашоо', driver: 'Айдоочу', horse: 'Ат менен саякат', craft: 'Кол өнөрчүлүк устаканасы', food: 'Үй тамагы' },
       become: {
+        benefitsTitle: 'Эмне үчүн Nomad Horizon менен хост болуу керек', benefits: [{ title: 'Акысыз жарыялоо', text: 'Азырынча профилди жарыялоо акысыз.' }, { title: 'Саякатчылар ишенген белги', text: 'Текшерүүдөн кийин профилиңизде «Nomad Horizon текшерген» белгиси көрүнөт.' }, { title: 'Чет элдик коноктор', text: 'Европа, Азия жана коңшу өлкөлөрдөн келген саякатчылар сизди өз тилинде табышат.' }, { title: 'Баарын өзүңүз чечесиз', text: 'Коноктор сизге түз жазышат; сунушту, даталарды жана бааны өзүңүз белгилейсиз.' }],
         kicker: 'Жергиликтүүлөр үчүн', title: 'Хост болуңуз', sub: 'Чет элдик саякатчыларга өрөөнүңүздү, боз үйүңүздү, өнөрүңүздү же дасторконуңузду көрсөтүңүз. Жарыялоо акысыз. Ар бир арызды текшерип, бир нече күндүн ичинде жооп беребиз.',
         name: 'Атыңыз', type: 'Эмне сунуштайсыз?', region: 'Аймак', languages: 'Кайсы тилдерде сүйлөйсүз', about: 'Өзүңүз жана жериңиз жөнүндө', aboutHint: 'Кыргызча, орусча же англисче жазыңыз — саякатчыларга кайсы тилде экенин көрсөтөбүз.', aboutLang: 'Бул тексттин тили',
         offerTitle: 'Сунуштун аталышы', offerTitleHint: 'Мисалы: Үй-бүлөлүк боз үйдө эки түн', duration: 'Узактыгы', durationHint: 'Мисалы: 1 күн, 2 түн', price: 'Баасы, USD (милдеттүү эмес)',
@@ -177,7 +201,7 @@
         kicker: 'Сапарга чейин', title: 'Чет элдик саякатчылар үчүн практикалык кеңештер', sub: 'Бизден эң көп сурашкан негизги нерселер. Эрежелер өзгөрүп турат, ошондуктан бул жердеги расмий булактарды дайыма текшериңиз.',
         official: 'Расмий портал', updated: 'Текшерилди: 2026-жылдын ноябры'
       },
-      contact: { kicker: 'Байланыш', title: 'Чыныгы адамга жазыңыз', sub: 'Болжол менен качан жана кандай саякаттагыңыз келерин жазыңыз. Англисче, кыргызча же орусча жооп беребиз.', channels: 'Же түз жазыңыз' },
+      contact: { reply: '24 сааттын ичинде жооп берүүгө аракет кылабыз.', kicker: 'Байланыш', title: 'Чыныгы адамга жазыңыз', sub: 'Болжол менен качан жана кандай саякаттагыңыз келерин жазыңыз. Англисче, кыргызча же орусча жооп беребиз.', channels: 'Же түз жазыңыз' },
       form: {
         title: 'Сизге кайда жооп беребиз?', name: 'Атыңыз', contact: 'Telegram, WhatsApp же e-mail', country: 'Өлкө (милдеттүү эмес)', month: 'Качан (милдеттүү эмес)', monthHint: 'Мисалы: 2027-жылдын июлу',
         group: 'Саякатчылар саны (милдеттүү эмес)', note: 'Дагы эмнени билишибиз керек? (милдеттүү эмес)', send: 'Суроо жөнөтүү', sending: 'Жөнөтүлүүдө…',
@@ -219,6 +243,17 @@
           { title: 'Путешествуйте с местными', text: 'Гиды, семьи с юртами и мастера, которые живут в этих местах, покажут их изнутри.' }
         ]
       },
+      why: {
+        kicker: 'Почему Nomad Horizon', title: 'Чем путешествие с нами отличается',
+        items: [
+          { icon: 'globe', title: 'Три языка', text: 'Весь сайт на английском, кыргызском и русском — для путешественников и для местных, которые их принимают.' },
+          { icon: 'bolt', title: 'Идея меньше чем за минуту', text: 'Два вопроса в планировщике дают настоящий маршрут с остановками и лучшим сезоном.' },
+          { icon: 'user', title: 'Отвечает живой человек', text: 'Каждая заявка приходит нашим дизайнерам поездок в Telegram. Стараемся ответить в течение 24 часов.' },
+          { icon: 'shield', title: 'Проверенные местные хосты', text: 'Гиды, семьи с юртами и мастера сами публикуют предложения; мы проверяем каждый профиль до публикации.' },
+          { icon: 'compass', title: 'Готово для гостей из-за границы', text: 'Визы, деньги, SIM-карты и местные обычаи — со ссылками на официальные источники.' },
+          { icon: 'lock', title: 'Ваши данные — только ваши', text: 'Без следящих cookie. Контакт нужен только для того, чтобы вам ответить.' }
+        ]
+      },
       hostsTeaser: { kicker: 'Местные хосты', title: 'Познакомьтесь с теми, кто здесь живёт', sub: 'Гиды, семьи с юртами, водители и мастера сами публикуют свои предложения. Мы проверяем каждый профиль, а общаетесь вы с ними напрямую.', become: 'Вы местный? Станьте хостом' },
       planner: {
         kicker: 'Планировщик', title: 'Первая идея меньше чем за минуту', sub: 'Два вопроса. Остальное придумаем вместе.',
@@ -254,6 +289,7 @@
       },
       hostTypes: { guide: 'Горный гид', yurt: 'Ночлег в юрте', driver: 'Водитель', horse: 'Конные прогулки', craft: 'Мастерская ремёсел', food: 'Домашняя кухня' },
       become: {
+        benefitsTitle: 'Почему стоит стать хостом Nomad Horizon', benefits: [{ title: 'Бесплатное размещение', text: 'Пока размещение профиля бесплатное.' }, { title: 'Знак, которому доверяют', text: 'После проверки в профиле появляется «Проверено Nomad Horizon».' }, { title: 'Гости из-за границы', text: 'Путешественники из Европы, Азии и соседних стран находят вас на своём языке.' }, { title: 'Вы решаете сами', text: 'Гости пишут вам напрямую; предложение, даты и цену задаёте вы.' }],
         kicker: 'Для местных', title: 'Станьте хостом', sub: 'Покажите путешественникам из-за границы свою долину, юрту, ремесло или кухню. Размещение бесплатно. Мы проверяем каждую заявку и отвечаем в течение нескольких дней.',
         name: 'Ваше имя', type: 'Что вы предлагаете?', region: 'Регион', languages: 'На каких языках говорите', about: 'О себе и своём месте', aboutHint: 'Пишите на кыргызском, русском или английском — мы покажем путешественникам, на каком языке текст.', aboutLang: 'Язык этого текста',
         offerTitle: 'Название предложения', offerTitleHint: 'Например: Две ночи в нашей семейной юрте', duration: 'Длительность', durationHint: 'Например: 1 день, 2 ночи', price: 'Цена от, USD (необязательно)',
@@ -265,7 +301,7 @@
         kicker: 'Перед поездкой', title: 'Практичные заметки для путешественников из-за границы', sub: 'Самое частое, о чём нас спрашивают. Правила меняются, поэтому всегда проверяйте официальные источники по ссылкам.',
         official: 'Официальный портал', updated: 'Проверено: ноябрь 2026'
       },
-      contact: { kicker: 'Контакты', title: 'Напишите живому человеку', sub: 'Расскажите, примерно когда и как хотите путешествовать. Отвечаем на английском, кыргызском или русском.', channels: 'Или напишите напрямую' },
+      contact: { reply: 'Стараемся ответить в течение 24 часов.', kicker: 'Контакты', title: 'Напишите живому человеку', sub: 'Расскажите, примерно когда и как хотите путешествовать. Отвечаем на английском, кыргызском или русском.', channels: 'Или напишите напрямую' },
       form: {
         title: 'Куда вам ответить?', name: 'Ваше имя', contact: 'Telegram, WhatsApp или почта', country: 'Страна (необязательно)', month: 'Когда (необязательно)', monthHint: 'Например: июль 2027',
         group: 'Сколько человек (необязательно)', note: 'Что нам важно знать? (необязательно)', send: 'Отправить запрос', sending: 'Отправляем…',

@@ -382,3 +382,20 @@ fieldset[aria-invalid="true"] .checks { outline: 2px solid var(--felt); border-r
 .credit-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; background: var(--card); border-radius: var(--radius-sm); padding: 12px; box-shadow: var(--shadow); font-size: 14px; overflow-wrap: anywhere; }
 .credit-thumb .media { aspect-ratio: 4 / 3; border-radius: 10px; }
 .credit-thumb .credit { display: none; }
+
+/* ------------------------------------------------------- why us */
+.why { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.why-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 40px; }
+.why-item p { color: var(--ink-2); margin: 0; }
+.why-item .h4 { margin: 14px 0 8px; }
+.why-icon { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: #e6eff2; color: var(--lake); }
+.why-icon .icon { width: 26px; height: 26px; }
+.benefits-title { margin-top: 0; }
+.benefits { list-style: none; margin: 0 0 28px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+.benefits li { display: flex; gap: 12px; align-items: flex-start; }
+.benefits .icon { color: var(--moss); margin-top: 4px; }
+.benefits strong { display: block; }
+.benefits span { color: var(--ink-2); font-size: 15px; }
+.reply-promise { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--lake); margin-bottom: 16px; }
+@media (max-width: 980px) { .why-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .why-grid, .benefits { grid-template-columns: 1fr; } }

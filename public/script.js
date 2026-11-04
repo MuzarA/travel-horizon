@@ -134,6 +134,12 @@
     check: '<path d="M5 12l5 5 9-10"/>',
     pin: '<path d="M12 21s-6-6.2-6-11a6 6 0 0112 0c0 4.8-6 11-6 11z"/><circle cx="12" cy="10" r="2"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
+    bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+    shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>'
   };
   function icon(name) {
@@ -198,7 +204,7 @@
     var langs = TH.langs.map(function (l) { return '<button type="button" class="lang-btn" data-lang="' + l.code + '" lang="' + l.htmlLang + '" aria-pressed="' + (l.code === state.lang) + '">' + esc(l.name) + '</button>'; }).join('');
     return '<footer class="site-footer"><div class="container footer-grid">' +
       '<div><a class="brand brand-footer" href="#top">' + TUNDUK + '<span>Nomad Horizon</span></a><p class="muted">' + esc(f.tagline) + '</p><p class="muted small">' + icon('pin') + ' ' + esc(f.place) + '</p></div>' +
-      '<div><h2 class="foot-title">' + esc(f.explore) + '</h2><ul class="foot-list"><li><a href="#destinations">' + esc(n.destinations) + '</a></li><li><a href="#ideas">' + esc(u.ideas.kicker) + '</a></li><li><a href="#planner">' + esc(u.planner.kicker) + '</a></li><li><a href="#before-you-go">' + esc(n.before) + '</a></li></ul></div>' +
+      '<div><h2 class="foot-title">' + esc(f.explore) + '</h2><ul class="foot-list"><li><a href="#destinations">' + esc(n.destinations) + '</a></li><li><a href="#ideas">' + esc(u.ideas.kicker) + '</a></li><li><a href="#planner">' + esc(u.planner.kicker) + '</a></li><li><a href="#why">' + esc(u.why.kicker) + '</a></li><li><a href="#before-you-go">' + esc(n.before) + '</a></li></ul></div>' +
       '<div><h2 class="foot-title">' + esc(f.locals) + '</h2><ul class="foot-list"><li><a href="#hosts">' + esc(n.hosts) + '</a></li><li><a href="#become-host">' + esc(u.become.title) + '</a></li></ul></div>' +
       '<div><h2 class="foot-title">' + esc(f.write) + '</h2><div class="foot-contacts">' + (contactLinks(c, 'foot-link') || '<a class="foot-link" href="#contact">' + esc(n.contact) + '</a>') + '</div>' +
       '<div class="lang-switch lang-switch-footer" role="group" aria-label="' + esc(u.langLabel) + '">' + langs + '</div></div>' +
@@ -238,6 +244,10 @@
     var hw = u.how;
     out.push('<section class="section how" id="how"><div class="container"><div class="section-head"><p class="kicker">' + esc(hw.kicker) + '</p><h2 class="h2">' + esc(hw.title) + '</h2></div>' +
       '<ol class="steps">' + hw.steps.map(function (s, i) { return '<li class="step"><span class="step-num">' + (i + 1) + '</span><h3 class="h4">' + esc(s.title) + '</h3><p>' + esc(s.text) + '</p></li>'; }).join('') + '</ol></div></section>');
+
+    var wy = u.why;
+    out.push('<section class="section why" id="why"><div class="container"><div class="section-head"><p class="kicker">' + esc(wy.kicker) + '</p><h2 class="h2">' + esc(wy.title) + '</h2></div>' +
+      '<ul class="why-grid">' + wy.items.map(function (x) { return '<li class="why-item"><span class="why-icon">' + icon(x.icon) + '</span><h3 class="h4">' + esc(x.title) + '</h3><p>' + esc(x.text) + '</p></li>'; }).join('') + '</ul></div></section>');
 
     var ht = u.hostsTeaser;
     out.push('<section class="section hosts-teaser" id="locals"><div class="container"><div class="section-head split"><div><p class="kicker">' + esc(ht.kicker) + '</p><h2 class="h2">' + esc(ht.title) + '</h2><p class="sub">' + esc(ht.sub) + '</p></div>' +
@@ -410,7 +420,8 @@
             '<input id="' + id + '" name="' + name + '" type="' + (opts.type || 'text') + '" maxlength="' + (opts.max || 120) + '"' + (opts.req ? ' required' : '') + (opts.hint ? ' placeholder="' + esc(opts.hint) + '"' : '') + '>') +
         (opts.help ? '<p class="help" id="' + id + '-h">' + esc(opts.help) + '</p>' : '') + '</div>';
     }
-    return pageHead(b.kicker, b.title, b.sub) + '<section class="section section-tight"><div class="container narrow">' +
+    var benefits = '<h2 class="h4 benefits-title">' + esc(b.benefitsTitle) + '</h2><ul class="benefits">' + b.benefits.map(function (x) { return '<li>' + icon('check') + '<div><strong>' + esc(x.title) + '</strong><span>' + esc(x.text) + '</span></div></li>'; }).join('') + '</ul>';
+    return pageHead(b.kicker, b.title, b.sub) + '<section class="section section-tight"><div class="container narrow">' + benefits +
       '<form class="host-form side-card" novalidate>' +
       '<div class="field-grid">' + f('name', b.name, { req: true, max: 80 }) + f('type', b.type, { req: true, select: typeOpts }) + f('region', b.region, { req: true, select: regOpts }) +
       f('aboutLang', b.aboutLang, { select: aboutLang }) + '</div>' +
@@ -440,7 +451,7 @@
   /* ---------------------------------------------------------- contact */
   function contactView() {
     var c = ui().contact, links = contactLinks(content().contacts, 'btn btn-outline');
-    return pageHead(c.kicker, c.title, c.sub) + '<section class="section section-tight"><div class="container detail-grid"><div class="detail-main"><div class="side-card">' + requestForm('general', { title: false }) + '</div></div>' +
+    return pageHead(c.kicker, c.title, c.sub) + '<section class="section section-tight"><div class="container detail-grid"><div class="detail-main"><p class="reply-promise">' + icon('user') + ' ' + esc(c.reply) + '</p><div class="side-card">' + requestForm('general', { title: false }) + '</div></div>' +
       '<aside class="detail-side">' + (links ? '<div class="side-card"><h2 class="h4">' + esc(c.channels) + '</h2><div class="direct">' + links + '</div></div>' : '') + '</aside></div></section>';
   }
 
@@ -463,7 +474,7 @@
   }
 
   /* ----------------------------------------------------------- router */
-  var HOME_ANCHORS = ['top', 'feeling', 'journeys', 'land', 'how', 'locals', 'planner', 'seasons', 'faq', 'main', ''];
+  var HOME_ANCHORS = ['top', 'feeling', 'journeys', 'land', 'how', 'why', 'locals', 'planner', 'seasons', 'faq', 'main', ''];
   function parseRoute() {
     var h = decodeURIComponent((location.hash || '').replace(/^#/, ''));
     if (HOME_ANCHORS.indexOf(h) >= 0) return { view: 'home', anchor: h };
