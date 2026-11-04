@@ -1,4 +1,4 @@
-/* Travel Horizon — all interface text, default content and the 9 planner routes.
+/* Nomad Horizon — all interface text, default content and the 9 planner routes.
    To add a language: add it to TH.langs and copy one full block below (ui, defaults, routes, faq, seasons, before). */
 (function (root) {
   'use strict';
@@ -16,7 +16,7 @@
   TH.ui = {
     en: {
       meta: {
-        title: 'Travel Horizon — custom trips in Kyrgyzstan',
+        title: 'Nomad Horizon — custom trips in Kyrgyzstan',
         description: 'Get your first Kyrgyzstan trip idea in under a minute, then plan it with a real person. Lakes, trails, nomad culture and local hosts.'
       },
       skip: 'Skip to content',
@@ -70,9 +70,9 @@
         highlights: 'Highlights', related: 'Trip ideas through this place', noRelated: 'We build trips here on request.', ask: 'Ask about this place'
       },
       hosts: {
-        kicker: 'Local hosts', title: 'Travel with the people who live here', sub: 'Every profile is checked by Travel Horizon. You contact hosts directly — no middleman in the conversation.',
+        kicker: 'Local hosts', title: 'Travel with the people who live here', sub: 'Every profile is checked by Nomad Horizon. You contact hosts directly — no middleman in the conversation.',
         filterType: 'Type', filterRegion: 'Region', any: 'Any', none: 'No hosts match these filters yet.',
-        checked: 'Checked by Travel Horizon', example: 'Example profile', speaks: 'Speaks', offer: 'Offer', duration: 'Duration',
+        checked: 'Checked by Nomad Horizon', example: 'Example profile', speaks: 'Speaks', offer: 'Offer', duration: 'Duration',
         priceFrom: 'From', priceOnRequest: 'Price on request', writtenIn: 'Written in', directly: 'Write directly',
         viaSite: 'Or send a message through our site', open: 'View profile', loading: 'Loading hosts…'
       },
@@ -82,7 +82,7 @@
         name: 'Your name', type: 'What do you offer?', region: 'Region', languages: 'Languages you speak', about: 'About you and your place', aboutHint: 'Write in Kyrgyz, Russian or English — we show travellers which language it is.', aboutLang: 'Language of this text',
         offerTitle: 'Offer title', offerTitleHint: 'For example: Two nights in our family yurt', duration: 'Duration', durationHint: 'For example: 1 day, 2 nights', price: 'Price from, USD (optional)',
         telegram: 'Telegram username', whatsapp: 'WhatsApp number', email: 'Email', contactHint: 'At least one way to reach you.', showContacts: 'Show my Telegram and WhatsApp on my public profile',
-        consent: 'I agree that Travel Horizon publishes this profile after checking it.', send: 'Send application',
+        consent: 'I agree that Nomad Horizon publishes this profile after checking it.', send: 'Send application',
         success: 'Thank you! Your application is with us. We will contact you before it goes live.', invalid: 'Please fill in the marked fields.'
       },
       before: {
@@ -104,7 +104,7 @@
 
     ky: {
       meta: {
-        title: 'Travel Horizon — Кыргызстан боюнча жеке саякаттар',
+        title: 'Nomad Horizon — Кыргызстан боюнча жеке саякаттар',
         description: 'Кыргызстан боюнча саякаттын алгачкы идеясын бир мүнөткө жетпей табыңыз, анан аны чыныгы адам менен бирге пландаңыз. Көлдөр, тоо жолдору, көчмөн маданияты жана жергиликтүү хосттор.'
       },
       skip: 'Негизги мазмунга өтүү',
@@ -158,9 +158,9 @@
         highlights: 'Эмнени көрүү керек', related: 'Ушул жер аркылуу өткөн идеялар', noRelated: 'Бул жерге саякатты суроо боюнча түзөбүз.', ask: 'Бул жер жөнүндө суроо'
       },
       hosts: {
-        kicker: 'Жергиликтүү хосттор', title: 'Бул жерде жашаган адамдар менен саякаттаңыз', sub: 'Ар бир профилди Travel Horizon текшерет. Хосттор менен түз байланышасыз — сүйлөшүүдө ортомчу жок.',
+        kicker: 'Жергиликтүү хосттор', title: 'Бул жерде жашаган адамдар менен саякаттаңыз', sub: 'Ар бир профилди Nomad Horizon текшерет. Хосттор менен түз байланышасыз — сүйлөшүүдө ортомчу жок.',
         filterType: 'Түрү', filterRegion: 'Аймак', any: 'Баары', none: 'Бул тандоо боюнча азырынча хосттор жок.',
-        checked: 'Travel Horizon текшерген', example: 'Үлгү профиль', speaks: 'Тилдери', offer: 'Сунуш', duration: 'Узактыгы',
+        checked: 'Nomad Horizon текшерген', example: 'Үлгү профиль', speaks: 'Тилдери', offer: 'Сунуш', duration: 'Узактыгы',
         priceFrom: 'Баасы', priceOnRequest: 'Баасы суроо боюнча', writtenIn: 'Жазылган тили', directly: 'Түз жазуу',
         viaSite: 'Же сайт аркылуу билдирүү жөнөтүңүз', open: 'Профилди көрүү', loading: 'Хосттор жүктөлүүдө…'
       },
@@ -170,7 +170,7 @@
         name: 'Атыңыз', type: 'Эмне сунуштайсыз?', region: 'Аймак', languages: 'Кайсы тилдерде сүйлөйсүз', about: 'Өзүңүз жана жериңиз жөнүндө', aboutHint: 'Кыргызча, орусча же англисче жазыңыз — саякатчыларга кайсы тилде экенин көрсөтөбүз.', aboutLang: 'Бул тексттин тили',
         offerTitle: 'Сунуштун аталышы', offerTitleHint: 'Мисалы: Үй-бүлөлүк боз үйдө эки түн', duration: 'Узактыгы', durationHint: 'Мисалы: 1 күн, 2 түн', price: 'Баасы, USD (милдеттүү эмес)',
         telegram: 'Telegram аты', whatsapp: 'WhatsApp номери', email: 'E-mail', contactHint: 'Сиз менен байланышуунун жок дегенде бир жолу.', showContacts: 'Telegram жана WhatsApp байланышымды ачык профилимде көрсөтүү',
-        consent: 'Travel Horizon бул профилди текшергенден кийин жарыялоосуна макулмун.', send: 'Арыз жөнөтүү',
+        consent: 'Nomad Horizon бул профилди текшергенден кийин жарыялоосуна макулмун.', send: 'Арыз жөнөтүү',
         success: 'Рахмат! Арызыңыз бизге келди. Жарыяланганга чейин сиз менен байланышабыз.', invalid: 'Белгиленген талааларды толтуруңуз.'
       },
       before: {
@@ -192,7 +192,7 @@
 
     ru: {
       meta: {
-        title: 'Travel Horizon — индивидуальные поездки по Кыргызстану',
+        title: 'Nomad Horizon — индивидуальные поездки по Кыргызстану',
         description: 'Первая идея поездки по Кыргызстану меньше чем за минуту, а дальше — вместе с живым человеком. Озёра, тропы, кочевая культура и местные хосты.'
       },
       skip: 'Перейти к содержанию',
@@ -246,9 +246,9 @@
         highlights: 'Что посмотреть', related: 'Идеи поездок через это место', noRelated: 'Поездки сюда собираем по запросу.', ask: 'Спросить об этом месте'
       },
       hosts: {
-        kicker: 'Местные хосты', title: 'Путешествуйте с теми, кто здесь живёт', sub: 'Каждый профиль проверен Travel Horizon. С хостами вы общаетесь напрямую — без посредника в разговоре.',
+        kicker: 'Местные хосты', title: 'Путешествуйте с теми, кто здесь живёт', sub: 'Каждый профиль проверен Nomad Horizon. С хостами вы общаетесь напрямую — без посредника в разговоре.',
         filterType: 'Тип', filterRegion: 'Регион', any: 'Любой', none: 'По этим фильтрам хостов пока нет.',
-        checked: 'Проверено Travel Horizon', example: 'Пример профиля', speaks: 'Языки', offer: 'Предложение', duration: 'Длительность',
+        checked: 'Проверено Nomad Horizon', example: 'Пример профиля', speaks: 'Языки', offer: 'Предложение', duration: 'Длительность',
         priceFrom: 'От', priceOnRequest: 'Цена по запросу', writtenIn: 'Написано на языке', directly: 'Написать напрямую',
         viaSite: 'Или отправьте сообщение через наш сайт', open: 'Открыть профиль', loading: 'Загружаем хостов…'
       },
@@ -258,7 +258,7 @@
         name: 'Ваше имя', type: 'Что вы предлагаете?', region: 'Регион', languages: 'На каких языках говорите', about: 'О себе и своём месте', aboutHint: 'Пишите на кыргызском, русском или английском — мы покажем путешественникам, на каком языке текст.', aboutLang: 'Язык этого текста',
         offerTitle: 'Название предложения', offerTitleHint: 'Например: Две ночи в нашей семейной юрте', duration: 'Длительность', durationHint: 'Например: 1 день, 2 ночи', price: 'Цена от, USD (необязательно)',
         telegram: 'Имя в Telegram', whatsapp: 'Номер WhatsApp', email: 'Почта', contactHint: 'Хотя бы один способ связаться с вами.', showContacts: 'Показывать мои Telegram и WhatsApp в публичном профиле',
-        consent: 'Я согласен(на), что Travel Horizon опубликует этот профиль после проверки.', send: 'Отправить заявку',
+        consent: 'Я согласен(на), что Nomad Horizon опубликует этот профиль после проверки.', send: 'Отправить заявку',
         success: 'Спасибо! Заявка у нас. Мы свяжемся с вами до публикации.', invalid: 'Заполните отмеченные поля.'
       },
       before: {

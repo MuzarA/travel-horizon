@@ -1,4 +1,4 @@
-# Travel Horizon — website v2
+# Nomad Horizon — website v2
 
 Custom trips in Kyrgyzstan for travellers from abroad, plus a marketplace of checked local hosts (P2P).
 Built to **Technical Requirements v2**.
@@ -51,7 +51,7 @@ Every trip request, message to a host and host application then arrives in that 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `HOST`, `PORT` | `127.0.0.1`, `4173` | Address the server listens on |
-| `PUBLIC_URL` | — | Public address, e.g. `https://travelhorizon.kg` (sitemap, Secure cookie) |
+| `PUBLIC_URL` | — | Public address, e.g. `https://nomadhorizon.kg` (sitemap, Secure cookie) |
 | `ADMIN_PASSWORD` | — | Use this password instead of `data/auth.json` |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | — | Telegram notifications |
 | `TRUST_PROXY` | — | Set `1` behind Caddy/Nginx so client IPs are correct |
@@ -79,13 +79,13 @@ show your direct contacts instead of sending.
 
 ```ini
 [Unit]
-Description=Travel Horizon
+Description=Nomad Horizon
 After=network.target
 
 [Service]
 WorkingDirectory=/opt/travel-horizon
 ExecStart=/usr/bin/node server.js
-Environment=PUBLIC_URL=https://travelhorizon.kg TRUST_PROXY=1
+Environment=PUBLIC_URL=https://nomadhorizon.kg TRUST_PROXY=1
 EnvironmentFile=/opt/travel-horizon/.env
 Restart=always
 User=www-data
@@ -97,7 +97,7 @@ WantedBy=multi-user.target
 `/etc/caddy/Caddyfile` (Caddy gets the HTTPS certificate automatically):
 
 ```
-travelhorizon.kg {
+nomadhorizon.kg {
     encode gzip
     reverse_proxy 127.0.0.1:4173
 }

@@ -1,4 +1,4 @@
-/* Travel Horizon — admin panel. Plain JavaScript; talks only to /api. */
+/* Nomad Horizon — admin panel. Plain JavaScript; talks only to /api. */
 (function () {
   'use strict';
   var TH = window.TH;
@@ -6,7 +6,7 @@
   /* ------------------------------------------------------- admin text */
   var L = {
     en: {
-      signInTitle: 'Admin sign in', signInSub: 'Travel Horizon content, requests and hosts.', password: 'Password', signIn: 'Sign in',
+      signInTitle: 'Admin sign in', signInSub: 'Nomad Horizon content, requests and hosts.', password: 'Password', signIn: 'Sign in',
       wrong: 'Wrong password. Attempts left: {n}.', blocked: 'Too many attempts. Login is blocked for {m} min.', netError: 'The server did not answer. Is it running?',
       openSite: 'Open site', signOut: 'Sign out', uiLang: 'Panel language',
       tabs: { content: 'Homepage', destinations: 'Destinations', contacts: 'Contacts', requests: 'Requests', hosts: 'Hosts', stats: 'Stats', files: 'Advanced' },
@@ -30,7 +30,7 @@
       confirmSave: 'Save {f}? A backup of the current version is kept.', restore: 'Restore previous version', confirmRestore: 'Replace {f} with the latest backup?', restored: 'Restored {f}.', backups: 'backups', noBackup: 'No backup to restore.'
     },
     ru: {
-      signInTitle: 'Вход в админку', signInSub: 'Контент, заявки и хосты Travel Horizon.', password: 'Пароль', signIn: 'Войти',
+      signInTitle: 'Вход в админку', signInSub: 'Контент, заявки и хосты Nomad Horizon.', password: 'Пароль', signIn: 'Войти',
       wrong: 'Неверный пароль. Осталось попыток: {n}.', blocked: 'Слишком много попыток. Вход заблокирован на {m} мин.', netError: 'Сервер не отвечает. Он запущен?',
       openSite: 'Открыть сайт', signOut: 'Выйти', uiLang: 'Язык панели',
       tabs: { content: 'Главная', destinations: 'Места', contacts: 'Контакты', requests: 'Заявки', hosts: 'Хосты', stats: 'Статистика', files: 'Для продвинутых' },
@@ -54,7 +54,7 @@
       confirmSave: 'Сохранить {f}? Текущая версия останется в резервной копии.', restore: 'Восстановить предыдущую версию', confirmRestore: 'Заменить {f} последней резервной копией?', restored: '{f} восстановлен.', backups: 'копий', noBackup: 'Нет копии для восстановления.'
     },
     ky: {
-      signInTitle: 'Админкага кирүү', signInSub: 'Travel Horizon мазмуну, суроолор жана хосттор.', password: 'Сырсөз', signIn: 'Кирүү',
+      signInTitle: 'Админкага кирүү', signInSub: 'Nomad Horizon мазмуну, суроолор жана хосттор.', password: 'Сырсөз', signIn: 'Кирүү',
       wrong: 'Сырсөз туура эмес. Калган аракеттер: {n}.', blocked: 'Аракеттер өтө көп. Кирүү {m} мүнөткө бөгөттөлдү.', netError: 'Сервер жооп бербейт. Ал иштеп жатабы?',
       openSite: 'Сайтты ачуу', signOut: 'Чыгуу', uiLang: 'Панелдин тили',
       tabs: { content: 'Башкы бет', destinations: 'Жерлер', contacts: 'Байланыштар', requests: 'Суроолор', hosts: 'Хосттор', stats: 'Статистика', files: 'Кошумча' },
@@ -143,7 +143,7 @@
     document.documentElement.lang = S.ui;
     var tabs = ['content', 'destinations', 'contacts', 'requests', 'hosts', 'stats', 'files'];
     var counts = { requests: S.requests ? S.requests.filter(function (r) { return r.status === 'new'; }).length : 0, hosts: S.hosts ? S.hosts.filter(function (h) { return h.status === 'pending'; }).length : 0 };
-    $('#admin').innerHTML = '<header class="topbar"><div class="topbar-inner"><a class="brand" href="/admin/">' + LOGO + 'Travel Horizon</a><span class="spacer"></span>' +
+    $('#admin').innerHTML = '<header class="topbar"><div class="topbar-inner"><a class="brand" href="/admin/">' + LOGO + 'Nomad Horizon</a><span class="spacer"></span>' +
       uiLangSelect('ui-lang') + '<a href="/" target="_blank" rel="noopener">' + esc(t().openSite) + '</a><button class="btn btn-small btn-light" data-logout type="button">' + esc(t().signOut) + '</button></div>' +
       '<nav class="tabs" role="tablist">' + tabs.map(function (k) {
         return '<button class="tab" role="tab" type="button" data-tab="' + k + '" aria-selected="' + (S.tab === k) + '">' + esc(t().tabs[k]) + (counts[k] ? '<span class="count">' + counts[k] + '</span>' : '') + '</button>';
@@ -288,7 +288,7 @@
   function viewContacts(v) {
     var c = (S.content && S.content.contacts) || {};
     v.innerHTML = '<h2 class="page">' + esc(t().contactsTitle) + '</h2><p class="page-sub">' + esc(t().contactsSub) + '</p><form class="panel" id="contacts-form" novalidate><div class="grid">' +
-      '<div class="field" data-field="telegram"><label for="c-tg">' + esc(t().tg) + '</label><input id="c-tg" name="telegram" value="' + esc(c.telegram) + '" placeholder="@travelhorizon"></div>' +
+      '<div class="field" data-field="telegram"><label for="c-tg">' + esc(t().tg) + '</label><input id="c-tg" name="telegram" value="' + esc(c.telegram) + '" placeholder="@nomadhorizon"></div>' +
       '<div class="field" data-field="whatsapp"><label for="c-wa">' + esc(t().wa) + '</label><input id="c-wa" name="whatsapp" value="' + esc(c.whatsapp) + '" placeholder="+996 …"></div>' +
       '<div class="field" data-field="email"><label for="c-em">' + esc(t().email) + '</label><input id="c-em" name="email" type="email" value="' + esc(c.email) + '"></div></div>' +
       '<button class="btn" type="submit">' + esc(t().save) + '</button></form>';

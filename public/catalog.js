@@ -1,4 +1,4 @@
-/* Travel Horizon — destination catalogue, regions and example host profiles.
+/* Nomad Horizon — destination catalogue, regions and example host profiles.
    Facts are approximate (≈) and should be checked by the trip designer before launch. */
 (function (root) {
   'use strict';

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-/* Travel Horizon — server.
+/* Nomad Horizon — server.
    Node.js 18+, built-in modules only. Serves the public site (public/), the admin panel (admin/)
    and a JSON API. All data lives in data/.
 
    Environment:
      HOST, PORT                 default 127.0.0.1:4173
-     PUBLIC_URL                 e.g. https://travelhorizon.kg (sitemap, Secure cookie)
+     PUBLIC_URL                 e.g. https://nomadhorizon.kg (sitemap, Secure cookie)
      ADMIN_PASSWORD             optional; otherwise data/auth.json (first start prints a password)
      TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID   optional; requests and host applications go to this chat
      TRUST_PROXY=1              read client IP from X-Forwarded-For (behind Caddy/Nginx)
@@ -103,7 +103,7 @@ function ensureData() {
   if (!fs.existsSync(FILES.content)) {
     const en = TH.defaults.en;
     const content = { version: 2, updatedAt: new Date().toISOString(), hero: en.hero, journeys: en.journeys, land: en.land, destinations: {},
-      contacts: { telegram: '', whatsapp: '', email: 'hello@travelhorizon.example' }, locales: { ky: {}, ru: {} } };
+      contacts: { telegram: '', whatsapp: '', email: 'hello@nomadhorizon.example' }, locales: { ky: {}, ru: {} } };
     fs.writeFileSync(FILES.content, JSON.stringify(content, null, 2));
   }
   if (!fs.existsSync(FILES.hosts)) {
@@ -495,7 +495,7 @@ on('POST', /^\/api\/requests$/, false, async (req, res, ip) => {
   const what = r.idea ? 'Idea: ' + r.idea + ' — ' + TH.routes.en[r.idea].title
     : r.place ? 'Place: ' + TH.places.en[r.place].name
       : r.hostId ? 'Host: ' + r.hostName + ' (' + r.hostId + ')' : 'General enquiry';
-  const text = 'New request · Travel Horizon\n' + what + '\nName: ' + r.name + '\nContact: ' + r.contact +
+  const text = 'New request · Nomad Horizon\n' + what + '\nName: ' + r.name + '\nContact: ' + r.contact +
     (r.country ? '\nCountry: ' + r.country : '') + (r.month ? '\nWhen: ' + r.month : '') + (r.group ? '\nTravellers: ' + r.group : '') +
     (r.note ? '\nNote: ' + r.note : '') + '\nLanguage: ' + r.lang.toUpperCase() + '\nTime: ' + r.createdAt;
   r.telegram = await telegram(text);
@@ -571,7 +571,7 @@ on('POST', /^\/api\/hosts\/apply$/, false, async (req, res, ip) => {
   await saveHosts();
   count('host_apply');
   const c = host.contacts;
-  await telegram('New host application · Travel Horizon\nName: ' + host.name + '\nType: ' + TH.ui.en.hostTypes[host.type] + '\nRegion: ' + TH.regions.en[host.region] +
+  await telegram('New host application · Nomad Horizon\nName: ' + host.name + '\nType: ' + TH.ui.en.hostTypes[host.type] + '\nRegion: ' + TH.regions.en[host.region] +
     '\nOffer: ' + host.offer.title + ' (' + host.offer.duration + ')' + '\nContacts: ' + [c.telegram && '@' + c.telegram, c.whatsapp, c.email].filter(Boolean).join(', ') + '\nReview it in the admin panel → Hosts.');
   send(res, 201, { ok: true });
 });
@@ -736,7 +736,7 @@ function start() {
   server.headersTimeout = 20000;
   server.requestTimeout = 60000;
   server.listen(PORT, HOST, () => {
-    console.log('Travel Horizon ' + VERSION + ' → http://' + HOST + ':' + PORT + '  (admin: /admin/)');
+    console.log('Nomad Horizon ' + VERSION + ' → http://' + HOST + ':' + PORT + '  (admin: /admin/)');
     console.log('Telegram notifications: ' + (TG_TOKEN && TG_CHAT ? 'on' : 'off (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)'));
   });
   const stop = () => { flushStats().finally(() => process.exit(0)); };

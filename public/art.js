@@ -1,4 +1,4 @@
-/* Travel Horizon — built-in illustrated landscapes (inline SVG).
+/* Nomad Horizon — built-in illustrated landscapes (inline SVG).
    Shown when no photo is set and kept behind every photo as a fallback. */
 (function (root) {
   'use strict';

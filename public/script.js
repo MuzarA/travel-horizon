@@ -1,4 +1,4 @@
-/* Travel Horizon — public site.
+/* Nomad Horizon — public site.
    Plain JavaScript, no framework. Views are switched by the address hash:
    #planner, #destinations, #d-<slug>, #ideas, #i-<mood>-<days>, #hosts, #h-<id>, #become-host, #before-you-go, #contact */
 (function () {
@@ -182,7 +182,7 @@
     }).join('');
     return '<a class="skip" href="#main">' + esc(u.skip) + '</a>' +
       '<header class="site-header' + (view === 'home' ? ' on-hero' : '') + '"><div class="container header-inner">' +
-      '<a class="brand" href="#top" aria-label="Travel Horizon">' + TUNDUK + '<span>Travel Horizon</span></a>' +
+      '<a class="brand" href="#top" aria-label="Nomad Horizon">' + TUNDUK + '<span>Nomad Horizon</span></a>' +
       '<button class="menu-btn" type="button" aria-expanded="' + state.menuOpen + '" aria-controls="site-nav">' + icon(state.menuOpen ? 'close' : 'menu') + '<span class="sr">' + esc(state.menuOpen ? n.close : n.menu) + '</span></button>' +
       '<nav id="site-nav" class="site-nav' + (state.menuOpen ? ' open' : '') + '" aria-label="Main">' +
       link('#top', n.home, view === 'home') + link('#destinations', n.destinations, view === 'destinations' || view === 'destination') +
@@ -197,12 +197,12 @@
     var u = ui(), f = u.footer, c = content().contacts, n = u.nav;
     var langs = TH.langs.map(function (l) { return '<button type="button" class="lang-btn" data-lang="' + l.code + '" lang="' + l.htmlLang + '" aria-pressed="' + (l.code === state.lang) + '">' + esc(l.name) + '</button>'; }).join('');
     return '<footer class="site-footer"><div class="container footer-grid">' +
-      '<div><a class="brand brand-footer" href="#top">' + TUNDUK + '<span>Travel Horizon</span></a><p class="muted">' + esc(f.tagline) + '</p><p class="muted small">' + icon('pin') + ' ' + esc(f.place) + '</p></div>' +
+      '<div><a class="brand brand-footer" href="#top">' + TUNDUK + '<span>Nomad Horizon</span></a><p class="muted">' + esc(f.tagline) + '</p><p class="muted small">' + icon('pin') + ' ' + esc(f.place) + '</p></div>' +
       '<div><h2 class="foot-title">' + esc(f.explore) + '</h2><ul class="foot-list"><li><a href="#destinations">' + esc(n.destinations) + '</a></li><li><a href="#ideas">' + esc(u.ideas.kicker) + '</a></li><li><a href="#planner">' + esc(u.planner.kicker) + '</a></li><li><a href="#before-you-go">' + esc(n.before) + '</a></li></ul></div>' +
       '<div><h2 class="foot-title">' + esc(f.locals) + '</h2><ul class="foot-list"><li><a href="#hosts">' + esc(n.hosts) + '</a></li><li><a href="#become-host">' + esc(u.become.title) + '</a></li></ul></div>' +
       '<div><h2 class="foot-title">' + esc(f.write) + '</h2><div class="foot-contacts">' + (contactLinks(c, 'foot-link') || '<a class="foot-link" href="#contact">' + esc(n.contact) + '</a>') + '</div>' +
       '<div class="lang-switch lang-switch-footer" role="group" aria-label="' + esc(u.langLabel) + '">' + langs + '</div></div>' +
-      '</div><div class="container foot-bottom"><span>© ' + new Date().getFullYear() + ' Travel Horizon. ' + esc(f.rights) + '</span><a href="#credits">' + esc(u.credits.kicker) + '</a></div></footer>';
+      '</div><div class="container foot-bottom"><span>© ' + new Date().getFullYear() + ' Nomad Horizon. ' + esc(f.rights) + '</span><a href="#credits">' + esc(u.credits.kicker) + '</a></div></footer>';
   }
 
   /* ------------------------------------------------------------ home */
@@ -520,10 +520,10 @@
     var u = ui(), l = TH.langs.filter(function (x) { return x.code === state.lang; })[0];
     document.documentElement.lang = l ? l.htmlLang : 'en';
     var title = u.meta.title, desc = u.meta.description;
-    if (r.view === 'destination' && catalogItem(r.id)) { var p = place(r.id); title = p.name + ' — Travel Horizon'; desc = p.short; }
-    if (r.view === 'idea' && route(r.id)) { title = route(r.id).title + ' — Travel Horizon'; desc = route(r.id).text; }
-    if (r.view === 'hosts') title = u.hosts.title + ' — Travel Horizon';
-    if (r.view === 'before') title = u.before.title + ' — Travel Horizon';
+    if (r.view === 'destination' && catalogItem(r.id)) { var p = place(r.id); title = p.name + ' — Nomad Horizon'; desc = p.short; }
+    if (r.view === 'idea' && route(r.id)) { title = route(r.id).title + ' — Nomad Horizon'; desc = route(r.id).text; }
+    if (r.view === 'hosts') title = u.hosts.title + ' — Nomad Horizon';
+    if (r.view === 'before') title = u.before.title + ' — Nomad Horizon';
     document.title = title;
     var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', desc);
     var og = document.querySelector('meta[property="og:title"]'); if (og) og.setAttribute('content', title);

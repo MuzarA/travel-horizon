@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Travel Horizon — acceptance checks (ТЗ v2, section 12).
+/* Nomad Horizon — acceptance checks (ТЗ v2, section 12).
    Starts its own server on a spare port with a temporary data folder, runs the checks, stops it.
    Usage: node test.js */
 'use strict';
@@ -108,8 +108,8 @@ async function main() {
     check('AC-07 missing title, http link, javascript link, 2 cards are all rejected', [noTitle, httpImg, twoCards, js].every((r) => r.status === 400), [noTitle, httpImg, twoCards, js].map((r) => r.status).join(','));
     check('AC-07 a rejected save changes nothing', unchanged.hero.titleLine === 'Where the rivers' && unchanged.journeys.length === 3);
     check('a request from another site is refused', (await call('PUT', '/api/content', good, { headers: { Origin: 'https://evil.example' } })).status === 403);
-    const contacts = await call('PUT', '/api/contacts', { telegram: '@travel_horizon', whatsapp: '+996 555 000 000', email: 'hello@travelhorizon.example' });
-    check('contacts are saved', contacts.status === 200 && (await call('GET', '/api/content')).json.contacts.telegram === 'travel_horizon');
+    const contacts = await call('PUT', '/api/contacts', { telegram: '@nomad_horizon', whatsapp: '+996 555 000 000', email: 'hello@nomadhorizon.example' });
+    check('contacts are saved', contacts.status === 200 && (await call('GET', '/api/content')).json.contacts.telegram === 'nomad_horizon');
 
     console.log('\nUploads (AC-06)');
     const png = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082', 'hex');
