@@ -17,9 +17,8 @@ module.exports = async (req, res) => {
     out.webhook = wh.ok ? { url: wh.result.url ? '(set)' : '', pending: wh.result.pending_update_count } : wh;
     const up = await call('getUpdates', { limit: 20 });
     out.getUpdates = up.ok ? { ok: true, count: up.result.length, chats: up.result.map(u => { const m = u.message || u.channel_post || u.my_chat_member || {}; return m.chat ? { id: m.chat.id, type: m.chat.type } : null; }) } : up;
-    if (req.query && req.query.send === '1' && up.ok && up.result.length) {
-      const u = up.result[up.result.length - 1]; const m = u.message || u.channel_post || u.my_chat_member;
-      const s = await call('sendMessage', { chat_id: m.chat.id, text: '✅ Nomad Horizon: тест связи сайта с ботом' });
+    if (req.query && req.query.send === '1' && process.env.TELEGRAM_CHAT_ID) {
+      const s = await call('sendMessage', { chat_id: process.env.TELEGRAM_CHAT_ID, text: '✅ Nomad Horizon: тест связи сайта с ботом. Заявки с сайта будут приходить сюда.' });
       out.send = s.ok ? { ok: true } : s;
     }
   }
