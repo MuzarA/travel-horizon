@@ -66,6 +66,13 @@ Every trip request, message to a host and host application then arrives in that 
 4. **Facts:** altitudes, seasons and drive times in `public/catalog.js` and `public/translations.js` are approximate — let the trip designer check them; ask a native speaker to read the Kyrgyz text once.
 5. **Visa note:** “Before you go” states the rule as of January 2026 and links the official portal evisa.e-gov.kg. Re-check it every season.
 
+## Quick public preview on Vercel (static)
+
+`vercel.json` is included: import this repository at https://vercel.com/new and press **Deploy** — no settings needed.
+The site, all three languages, the planner and the Wikimedia photos work there. Requests, host applications and the
+admin panel need the Node.js server (`node server.js` on your own server, see below): on a static host the forms
+show your direct contacts instead of sending.
+
 ## Deploy on a VPS (HTTPS)
 
 `/etc/systemd/system/travel-horizon.service`:
