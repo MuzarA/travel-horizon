@@ -7,7 +7,7 @@
   var L = {
     en: {
       signInTitle: 'Admin sign in', signInSub: 'Nomad Horizon content, requests and hosts.', password: 'Password', signIn: 'Sign in',
-      wrong: 'Wrong password. Attempts left: {n}.', blocked: 'Too many attempts. Login is blocked for {m} min.', netError: 'The server did not answer. Is it running?',
+      wrong: 'Wrong password. Attempts left: {n}.', blocked: 'Too many attempts. Login is blocked for {m} min.', netError: 'The server did not answer. Is it running?', noDb: 'The database is not connected yet. Connect PostgreSQL (DATABASE_URL) and reload this page.', filesVercel: 'On Vercel the site files are part of the deployment and cannot be changed from here. Edit them in the GitHub repository; Vercel publishes the new version.',
       openSite: 'Open site', signOut: 'Sign out', uiLang: 'Panel language',
       tabs: { content: 'Homepage', destinations: 'Destinations', contacts: 'Contacts', requests: 'Requests', hosts: 'Hosts', stats: 'Stats', files: 'Advanced' },
       contentTitle: 'Homepage content', contentSub: 'Edit the hero, the three journey cards and the land section for each language. Changes show after the visitor reloads the page.',
@@ -16,7 +16,7 @@
       hero: 'Hero', heroHint: 'The first screen. 5 text fields.', cards: 'Journey cards', cardsHint: 'Exactly three cards: Issyk-Kul, Ala-Archa, Sary-Chelek.', card: 'Card', land: 'The land section', landHint: 'Song-Kul and the seasons.',
       f: { eyebrow: 'Small line above the title', titleLine: 'Title', titleEmphasis: 'Title, highlighted part', copyFirst: 'First paragraph', copySecond: 'Second paragraph', label: 'Label', duration: 'Duration', title: 'Title', description: 'Description', image: 'Photo', alt: 'Photo description (alt text)', caption: 'Caption', name: 'Name', short: 'Short line', story: 'Story' },
       save: 'Save', saving: 'Saving…', saved: 'Saved. Visitors see it after reload.', unsaved: 'Unsaved changes', allSaved: 'All changes saved', checkFields: 'Check the highlighted fields.', saveError: 'Could not save: {e}',
-      upload: 'Upload photo', remove: 'Remove', urlPh: 'https://… or upload', uploading: 'Uploading…', tooBig: 'The file is larger than 8 MB.', badType: 'Use JPEG, PNG or WebP.', uploaded: 'Photo uploaded. Press Save to publish it.', imgHint: 'JPEG, PNG or WebP up to 8 MB, or a secure https link. Empty = built-in Wikimedia photo with author credit.',
+      upload: 'Upload photo', remove: 'Remove', urlPh: 'https://… or upload', uploading: 'Uploading…', tooBig: 'The file is larger than 4 MB.', badType: 'Use JPEG, PNG or WebP.', uploaded: 'Photo uploaded. Press Save to publish it.', imgHint: 'JPEG, PNG or WebP up to 4 MB, or a secure https link. Empty = built-in Wikimedia photo with author credit.',
       destTitle: 'Destinations', destSub: 'Override the name, texts and photo of any of the 10 places. Facts (altitude, season) live in catalog.js.',
       contactsTitle: 'Contacts', contactsSub: 'Shown in the footer, on the contact page and when a request cannot be sent. Shared by all languages.', tg: 'Telegram username', wa: 'WhatsApp number', email: 'Email',
       reqTitle: 'Requests', reqSub: 'Every request from the site, newest first. Also sent to Telegram when it is configured.', all: 'All', st: { new: 'New', progress: 'In progress', done: 'Done' },
@@ -31,7 +31,7 @@
     },
     ru: {
       signInTitle: 'Вход в админку', signInSub: 'Контент, заявки и хосты Nomad Horizon.', password: 'Пароль', signIn: 'Войти',
-      wrong: 'Неверный пароль. Осталось попыток: {n}.', blocked: 'Слишком много попыток. Вход заблокирован на {m} мин.', netError: 'Сервер не отвечает. Он запущен?',
+      wrong: 'Неверный пароль. Осталось попыток: {n}.', blocked: 'Слишком много попыток. Вход заблокирован на {m} мин.', netError: 'Сервер не отвечает. Он запущен?', noDb: 'База данных ещё не подключена. Подключите PostgreSQL (DATABASE_URL) и обновите страницу.', filesVercel: 'На Vercel файлы сайта входят в сборку и отсюда не меняются. Правьте их в репозитории на GitHub — Vercel опубликует новую версию.',
       openSite: 'Открыть сайт', signOut: 'Выйти', uiLang: 'Язык панели',
       tabs: { content: 'Главная', destinations: 'Места', contacts: 'Контакты', requests: 'Заявки', hosts: 'Хосты', stats: 'Статистика', files: 'Для продвинутых' },
       contentTitle: 'Контент главной', contentSub: 'Редактируйте первый экран, три карточки и раздел о земле для каждого языка. Посетитель увидит изменения после перезагрузки страницы.',
@@ -40,7 +40,7 @@
       hero: 'Первый экран', heroHint: 'Первое, что видит посетитель. 5 текстовых полей.', cards: 'Карточки путешествий', cardsHint: 'Ровно три карточки: Иссык-Куль, Ала-Арча, Сары-Челек.', card: 'Карточка', land: 'Раздел «Земля»', landHint: 'Сон-Куль и сезоны.',
       f: { eyebrow: 'Строка над заголовком', titleLine: 'Заголовок', titleEmphasis: 'Заголовок, выделенная часть', copyFirst: 'Первый абзац', copySecond: 'Второй абзац', label: 'Метка', duration: 'Длительность', title: 'Название', description: 'Описание', image: 'Фото', alt: 'Описание фото (alt)', caption: 'Подпись', name: 'Название', short: 'Короткая строка', story: 'Рассказ' },
       save: 'Сохранить', saving: 'Сохраняем…', saved: 'Сохранено. Посетители увидят после перезагрузки.', unsaved: 'Есть несохранённые изменения', allSaved: 'Все изменения сохранены', checkFields: 'Проверьте отмеченные поля.', saveError: 'Не удалось сохранить: {e}',
-      upload: 'Загрузить фото', remove: 'Убрать', urlPh: 'https://… или загрузите', uploading: 'Загружаем…', tooBig: 'Файл больше 8 МБ.', badType: 'Нужен JPEG, PNG или WebP.', uploaded: 'Фото загружено. Нажмите «Сохранить», чтобы опубликовать.', imgHint: 'JPEG, PNG или WebP до 8 МБ, либо защищённая ссылка https. Пусто = встроенное фото с Wikimedia с подписью автора.',
+      upload: 'Загрузить фото', remove: 'Убрать', urlPh: 'https://… или загрузите', uploading: 'Загружаем…', tooBig: 'Файл больше 4 МБ.', badType: 'Нужен JPEG, PNG или WebP.', uploaded: 'Фото загружено. Нажмите «Сохранить», чтобы опубликовать.', imgHint: 'JPEG, PNG или WebP до 4 МБ, либо защищённая ссылка https. Пусто = встроенное фото с Wikimedia с подписью автора.',
       destTitle: 'Места', destSub: 'Можно заменить название, тексты и фото любого из 10 мест. Факты (высота, сезон) хранятся в catalog.js.',
       contactsTitle: 'Контакты', contactsSub: 'Показываются в подвале, на странице контактов и если заявку не удалось отправить. Общие для всех языков.', tg: 'Имя в Telegram', wa: 'Номер WhatsApp', email: 'Почта',
       reqTitle: 'Заявки', reqSub: 'Все заявки с сайта, новые сверху. Если Telegram настроен, они приходят и туда.', all: 'Все', st: { new: 'Новая', progress: 'В работе', done: 'Готово' },
@@ -55,7 +55,7 @@
     },
     ky: {
       signInTitle: 'Админкага кирүү', signInSub: 'Nomad Horizon мазмуну, суроолор жана хосттор.', password: 'Сырсөз', signIn: 'Кирүү',
-      wrong: 'Сырсөз туура эмес. Калган аракеттер: {n}.', blocked: 'Аракеттер өтө көп. Кирүү {m} мүнөткө бөгөттөлдү.', netError: 'Сервер жооп бербейт. Ал иштеп жатабы?',
+      wrong: 'Сырсөз туура эмес. Калган аракеттер: {n}.', blocked: 'Аракеттер өтө көп. Кирүү {m} мүнөткө бөгөттөлдү.', netError: 'Сервер жооп бербейт. Ал иштеп жатабы?', noDb: 'Маалымат базасы азырынча туташа элек. PostgreSQL (DATABASE_URL) туташтырып, бетти жаңылаңыз.', filesVercel: 'Vercel’де сайттын файлдары жыйынтыкка кирет жана бул жерден өзгөрбөйт. Аларды GitHub репозиторийинде оңдоңуз — Vercel жаңы версияны жарыялайт.',
       openSite: 'Сайтты ачуу', signOut: 'Чыгуу', uiLang: 'Панелдин тили',
       tabs: { content: 'Башкы бет', destinations: 'Жерлер', contacts: 'Байланыштар', requests: 'Суроолор', hosts: 'Хосттор', stats: 'Статистика', files: 'Кошумча' },
       contentTitle: 'Башкы беттин мазмуну', contentSub: 'Ар бир тил үчүн биринчи экранды, үч карточканы жана «Жер» бөлүмүн оңдоңуз. Келүүчү өзгөрүүлөрдү бетти кайра жүктөгөндөн кийин көрөт.',
@@ -64,7 +64,7 @@
       hero: 'Биринчи экран', heroHint: 'Келүүчү эң биринчи көргөн бөлүк. 5 текст талаасы.', cards: 'Саякат карточкалары', cardsHint: 'Так үч карточка: Ысык-Көл, Ала-Арча, Сары-Челек.', card: 'Карточка', land: '«Жер» бөлүмү', landHint: 'Соң-Көл жана мезгилдер.',
       f: { eyebrow: 'Аталыштын үстүндөгү сап', titleLine: 'Аталыш', titleEmphasis: 'Аталыштын бөлүнгөн бөлүгү', copyFirst: 'Биринчи абзац', copySecond: 'Экинчи абзац', label: 'Белги', duration: 'Узактыгы', title: 'Аталышы', description: 'Сүрөттөмө', image: 'Сүрөт', alt: 'Сүрөттүн сүрөттөмөсү (alt)', caption: 'Кол жазуу', name: 'Аталышы', short: 'Кыска сап', story: 'Баян' },
       save: 'Сактоо', saving: 'Сакталууда…', saved: 'Сакталды. Келүүчүлөр кайра жүктөгөндөн кийин көрүшөт.', unsaved: 'Сакталбаган өзгөрүүлөр бар', allSaved: 'Бардык өзгөрүүлөр сакталды', checkFields: 'Белгиленген талааларды текшериңиз.', saveError: 'Сактоо мүмкүн болбоду: {e}',
-      upload: 'Сүрөт жүктөө', remove: 'Алып салуу', urlPh: 'https://… же жүктөңүз', uploading: 'Жүктөлүүдө…', tooBig: 'Файл 8 МБдан чоң.', badType: 'JPEG, PNG же WebP колдонуңуз.', uploaded: 'Сүрөт жүктөлдү. Жарыялоо үчүн «Сактоо» баскычын басыңыз.', imgHint: '8 МБга чейинки JPEG, PNG же WebP, же коопсуз https шилтеме. Бош = автору көрсөтүлгөн Wikimedia сүрөтү.',
+      upload: 'Сүрөт жүктөө', remove: 'Алып салуу', urlPh: 'https://… же жүктөңүз', uploading: 'Жүктөлүүдө…', tooBig: 'Файл 4 МБдан чоң.', badType: 'JPEG, PNG же WebP колдонуңуз.', uploaded: 'Сүрөт жүктөлдү. Жарыялоо үчүн «Сактоо» баскычын басыңыз.', imgHint: '4 МБга чейинки JPEG, PNG же WebP, же коопсуз https шилтеме. Бош = автору көрсөтүлгөн Wikimedia сүрөтү.',
       destTitle: 'Жерлер', destSub: '10 жердин каалаганынын аталышын, тексттерин жана сүрөтүн алмаштырсаңыз болот. Фактылар (бийиктик, мезгил) catalog.js файлында.',
       contactsTitle: 'Байланыштар', contactsSub: 'Төмөнкү бөлүктө, байланыш бетинде жана суроо жөнөтүлбөй калганда көрсөтүлөт. Бардык тилдер үчүн жалпы.', tg: 'Telegram аты', wa: 'WhatsApp номери', email: 'E-mail',
       reqTitle: 'Суроолор', reqSub: 'Сайттан келген бардык суроолор, жаңылары жогоруда. Telegram туураланса, ал жакка да келет.', all: 'Баары', st: { new: 'Жаңы', progress: 'Иште', done: 'Бүттү' },
@@ -133,6 +133,7 @@
       msg.hidden = false;
       if (e.status === 401) msg.textContent = fmt(t().wrong, { n: d.attemptsLeft });
       else if (e.status === 429) msg.textContent = fmt(t().blocked, { m: Math.ceil((d.retryAfterSeconds || 900) / 60) });
+      else if (e.status === 503) msg.textContent = t().noDb;
       else msg.textContent = t().netError;
       $('#pw').select();
     });
@@ -273,7 +274,7 @@
   function uploadFile(file, cb) {
     if (!file) return;
     if (['image/jpeg', 'image/png', 'image/webp'].indexOf(file.type) < 0) return toast(t().badType, true);
-    if (file.size > 8 * 1024 * 1024) return toast(t().tooBig, true);
+    if (file.size > 4 * 1024 * 1024) return toast(t().tooBig, true);
     toast(t().uploading);
     api('POST', '/api/uploads', undefined, file).then(function (r) { cb(r.url); toast(t().uploaded); }).catch(function (e) {
       if (e.status !== 401) toast(e.status === 413 ? t().tooBig : e.status === 415 ? t().badType : fmt(t().saveError, { e: e.message }), true);
@@ -387,7 +388,10 @@
       '<div class="toolbar"><div class="seg" role="group" aria-label="' + esc(t().file) + '">' + ['index.html', 'styles.css', 'script.js'].map(function (n) { return '<button type="button" data-file="' + n + '" aria-pressed="' + (S.file === n) + '">' + n + '</button>'; }).join('') + '</div><span class="muted small" data-backups></span></div>' +
       '<div class="field"><label for="code" class="sr">' + esc(S.file) + '</label><textarea id="code" class="code" spellcheck="false">…</textarea></div>' +
       '<div class="toolbar"><button class="btn" type="button" data-file-save>' + esc(t().save) + '</button><button class="btn btn-light" type="button" data-file-restore>' + esc(t().restore) + '</button></div>';
-    api('GET', '/api/files/' + S.file).then(function (r) { $('#code').value = r.content; });
+    api('GET', '/api/files/' + S.file).then(function (r) { $('#code').value = r.content; }).catch(function (e) {
+      if (e.status !== 501) return;
+      v.innerHTML = '<h2 class="page">' + esc(t().filesTitle) + '</h2><p class="notice">' + esc(t().filesVercel) + '</p>';
+    });
     api('GET', '/api/files').then(function (r) { var f = r.files.filter(function (x) { return x.name === S.file; })[0]; if (f) $('[data-backups]').textContent = f.backups + ' ' + t().backups; });
   }
 
@@ -509,5 +513,5 @@
     }).catch(function (e) { if (e.status !== 401) $('#admin').innerHTML = '<p class="boot">' + esc(t().netError) + '</p>'; });
   }
 
-  api('GET', '/api/session').then(function (s) { if (s.authenticated) loadAll(); else renderLogin(); }).catch(function () { renderLogin(t().netError); });
+  api('GET', '/api/session').then(function (s) { if (s.authenticated) loadAll(); else renderLogin(s.database === false ? t().noDb : ''); }).catch(function () { renderLogin(t().netError); });
 })();

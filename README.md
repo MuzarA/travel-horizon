@@ -1,37 +1,62 @@
-# Nomad Horizon — website v2
+# Nomad Horizon — website v3
 
 Custom trips in Kyrgyzstan for travellers from abroad, plus a marketplace of checked local hosts (P2P).
 Built to **Technical Requirements v2**.
 
 - Public site in **English, Kyrgyz and Russian**: home page (hero, the feeling, journeys, the land, how it works, local hosts, planner, seasons, FAQ, quote), catalogue of 10 destinations with a page each, 9 trip ideas with a page each, local hosts, “Become a host”, “Before you go”, contact.
 - Trip planner: 3 durations × 3 moods = 9 route ideas, each can be requested in one step.
-- Requests are saved on the server and sent to **Telegram**; the admin inbox has statuses New / In progress / Done.
+- **Backend + PostgreSQL database:** requests, hosts, site texts, photos, admin sessions, login attempts, stats and the audit log are rows in 8 tables (`db/schema.sql`).
+- Requests are saved in the database and sent to **Telegram**; the admin inbox has statuses New / In progress / Done.
 - Local hosts apply through the site; only profiles approved in the admin panel are public.
 - Admin panel (EN / RU / KY): homepage texts and photos per language, destinations, contacts, requests, hosts moderation, stats with goals G1–G6, advanced file editing with backups.
 - Cookie-free analytics, CSP and security headers, hashed password, login lockout, upload checks, rate limits, audit log.
-- **No dependencies.** Only Node.js 18+ is needed. No build step.
+- **No npm dependencies.** Node.js 18+ and PostgreSQL. The PostgreSQL client (`lib/pg.js`: TLS, SCRAM-SHA-256, transactions) uses only built-in modules. No build step.
+- Runs the same code on your own server (`node server.js`) and on **Vercel** (`api/index.js`) with a Neon PostgreSQL database.
 
 ## Run locally
 
+You need Node.js 18+ and a PostgreSQL database — a local one, or the free Neon database from Vercel (copy its `DATABASE_URL`).
+
 ```bash
-node server.js
+createdb nomad                                   # once, if PostgreSQL is installed locally
+DATABASE_URL=postgres://user:password@localhost:5432/nomad node server.js
 ```
 
 Open http://127.0.0.1:4173 — the admin panel is at http://127.0.0.1:4173/admin/.
-On the first start the server prints a one-time admin password. Change it any time:
+On the first start the server creates all tables, adds the example hosts and prints a one-time admin password. Change it any time:
 
 ```bash
-node server.js set-password "a-long-new-password"
+DATABASE_URL=… node server.js set-password "a-long-new-password"
 ```
+
+Without `DATABASE_URL` the public site still works and forms go only to Telegram; the admin panel then says the database is not connected.
+
+## Database
+
+`db/schema.sql` is run on every start (all statements are safe to repeat):
+
+| Table | What it keeps |
+| --- | --- |
+| `settings` | site content (texts, photos, contacts per language, JSONB), admin password hash |
+| `requests` | trip requests, questions about places, messages to hosts; status New / In progress / Done, first response time, Telegram delivery |
+| `hosts` | local hosts: applications and approved profiles (languages, offer, contacts as JSONB) |
+| `sessions` | admin sessions — only a SHA-256 hash of the cookie token |
+| `login_attempts` | wrong passwords per IP; 5 in a row block the address for 15 minutes |
+| `stats_daily` | cookie-free counters per day and event (visits, planner, requests, host applications) |
+| `uploads` | photos uploaded in the admin panel (JPEG / PNG / WebP up to 4 MB), served at `/uploads/…` |
+| `audit_log` | who did what in the admin panel |
+
+`requests.host_id` references `hosts.id`; statuses, request kinds and group size are checked by the database (`CHECK`).
 
 ## Check that everything works
 
 ```bash
-node test.js
+TEST_DATABASE_URL=postgres://postgres:password@localhost:5432/postgres node test.js
 ```
 
-Starts its own server with a temporary data folder and runs the acceptance checks from the ТЗ
-(27 planner results, login lockout, content save, validation, uploads, requests, hosts, analytics). Expected: `48 passed, 0 failed`.
+Creates a temporary database, starts its own server and runs the acceptance checks from the ТЗ
+(27 planner results, login lockout, content save, validation, uploads, requests, hosts, analytics,
+data surviving a restart, rows in the tables, work without a database), then drops the database. Expected: `60 passed, 0 failed`.
 
 ## Telegram notifications
 
@@ -44,18 +69,19 @@ Starts its own server with a temporary data folder and runs the acceptance check
 TELEGRAM_BOT_TOKEN=123:ABC TELEGRAM_CHAT_ID=-1001234567 node server.js
 ```
 
-Every trip request, message to a host and host application then arrives in that chat. Requests are always saved in the admin inbox too, so nothing is lost if Telegram is down.
+Every trip request, message to a host and host application then arrives in that chat. Requests are always saved in the database and the admin inbox too, so nothing is lost if Telegram is down.
 
 ## Settings (environment variables)
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
+| `DATABASE_URL` | — | PostgreSQL connection, e.g. `postgres://user:pass@host:5432/db?sslmode=require` (`POSTGRES_URL` also works) |
 | `HOST`, `PORT` | `127.0.0.1`, `4173` | Address the server listens on |
 | `PUBLIC_URL` | — | Public address, e.g. `https://nomadhorizon.kg` (sitemap, Secure cookie) |
-| `ADMIN_PASSWORD` | — | Use this password instead of `data/auth.json` |
+| `ADMIN_PASSWORD` | — | Use this password instead of the one stored in the database |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | — | Telegram notifications |
 | `TRUST_PROXY` | — | Set `1` behind Caddy/Nginx so client IPs are correct |
-| `DATA_DIR` | `./data` | Where content, requests, hosts, stats and photos are kept |
+| `DATA_DIR` | `./data` | Backups made by Admin → Advanced (own server only) |
 | `TIME_ZONE` | `Asia/Bishkek` | Day boundaries for stats |
 
 ## Before going live
@@ -66,25 +92,26 @@ Every trip request, message to a host and host application then arrives in that 
 4. **Facts:** altitudes, seasons and drive times in `public/catalog.js` and `public/translations.js` are approximate — let the trip designer check them; ask a native speaker to read the Kyrgyz text once.
 5. **Visa note:** “Before you go” states the rule as of January 2026 and links the official portal evisa.e-gov.kg. Re-check it every season.
 
-## Hosting on Vercel (with Telegram requests)
+## Hosting on Vercel (backend + Neon PostgreSQL)
 
-`vercel.json` and the `api/` folder are included: import this repository at https://vercel.com/new and press **Deploy**.
-On Vercel the site, all three languages, the planner and the photos work, and two small functions send forms to Telegram:
+Import this repository at https://vercel.com/new. `vercel.json` serves `public/` as static files and sends
+`/api/*`, `/uploads/*`, `/sitemap.xml` and `/robots.txt` to one function, `api/index.js`, which runs the whole backend (`lib/app.js`).
 
-| Function | What it sends |
-| --- | --- |
-| `api/requests.js` | Trip requests, questions about a place, messages to hosts, general enquiries |
-| `api/hosts/apply.js` | Become a host applications |
-
-Set in **Vercel → Project → Settings → Environment Variables** (then redeploy):
+1. **Database:** Vercel → Project → **Storage** → **Create Database** → **Neon** → connect it to the project
+   (Production and Preview). Vercel adds `DATABASE_URL`; the tables are created on the first request.
+2. **Environment variables** (Settings → Environment Variables):
 
 | Variable | Value |
 | --- | --- |
+| `ADMIN_PASSWORD` | password for `/admin/` |
 | `TELEGRAM_BOT_TOKEN` | the token from @BotFather |
-| `TELEGRAM_CHAT_ID` | your chat ID (optional: if empty, the chat that last wrote to the bot is used — send `/start` to your bot first) |
+| `TELEGRAM_CHAT_ID` | your chat ID (needed if the bot has a webhook) |
 
-If Telegram cannot be reached, the visitor sees your direct contacts instead of a false “sent”.
-The admin panel, requests inbox, host moderation and stats need the Node.js server (`node server.js`, below).
+3. Redeploy. `GET /api/health` shows `"database":"connected"`.
+
+Everything works on Vercel — site, forms, admin panel, requests inbox, host moderation, stats, photo uploads — except
+Admin → Advanced (editing site files): there the files are part of the deployment, so edit them in GitHub.
+Until the database is connected the site keeps working and forms go only to Telegram.
 
 ## Deploy on a VPS (HTTPS)
 
@@ -99,7 +126,7 @@ After=network.target
 WorkingDirectory=/opt/travel-horizon
 ExecStart=/usr/bin/node server.js
 Environment=PUBLIC_URL=https://nomadhorizon.kg TRUST_PROXY=1
-EnvironmentFile=/opt/travel-horizon/.env
+EnvironmentFile=/opt/travel-horizon/.env   # DATABASE_URL, ADMIN_PASSWORD, TELEGRAM_*
 Restart=always
 User=www-data
 
@@ -116,13 +143,20 @@ nomadhorizon.kg {
 }
 ```
 
-Back up the `data/` folder every day (content, requests, hosts, photos). Monitor `GET /api/health`.
+Back up the database every day (`pg_dump "$DATABASE_URL" > nomad-$(date +%F).sql`; Neon also keeps its own history). Monitor `GET /api/health`.
 
 ## Structure
 
 ```
-server.js            HTTP server and JSON API (built-in modules only)
-test.js              acceptance checks
+server.js            HTTP server for your own computer or VPS
+api/index.js         the same backend as one Vercel function
+lib/
+  app.js             API, validation, auth, routing (shared by both)
+  pg.js              PostgreSQL client: wire protocol v3, TLS, SCRAM-SHA-256(-PLUS), transactions
+  telegram.js        Telegram delivery
+db/schema.sql        tables, keys, checks and indexes
+test.js              acceptance checks against a temporary PostgreSQL database
+vercel.json          static site + rewrites to api/index.js
 public/
   index.html         page shell, meta, structured data
   styles.css         all public styles
@@ -130,34 +164,31 @@ public/
   translations.js    every text in EN / KY / RU, 9 routes, FAQ, Before you go
   catalog.js         10 destinations, regions, Wikimedia photos with credits, example hosts
   art.js             built-in SVG landscapes and host avatars
-admin/
-  index.html, admin.css, admin.js   admin panel
-data/                created on first start: content.json, hosts.json, requests.json,
-                     stats.json, auth.json, audit.log, uploads/, backups/
+  admin/             admin panel (index.html, admin.css, admin.js)
 ```
 
 ### Adding a language
 
 Add it to `TH.langs` in `translations.js` and copy one full block (`ui`, `defaults`, `routes`, `faq`, `before`, `quote`)
-plus `places` and `regions` in `catalog.js`. Add the code to `LANGS` in `server.js`. `node test.js` tells you if a key is missing.
+plus `places` and `regions` in `catalog.js`. Add the code to `LANGS` in `lib/app.js`. `node test.js` tells you if a key is missing.
 
 ## API
 
 | Method and path | Purpose | Login |
 | --- | --- | --- |
-| GET /api/health | Server status | No |
+| GET /api/health | Server and database status | No |
 | GET /api/content | Site content | No |
 | PUT /api/content | Save content for one language | Yes |
 | PUT /api/contacts | Save contacts | Yes |
 | POST /api/login, /api/logout · GET /api/session | Admin session | No |
-| POST /api/uploads | Upload a JPEG/PNG/WebP up to 8 MB | Yes |
+| POST /api/uploads | Upload a JPEG/PNG/WebP up to 4 MB (stored in the database) | Yes |
 | POST /api/requests | Send a request (trip, place, host, general) | No |
 | GET /api/requests · PATCH /api/requests/{id} | Inbox and status | Yes |
 | GET /api/hosts | Approved hosts | No |
 | POST /api/hosts/apply | Host application | No |
 | GET /api/admin/hosts · PATCH/DELETE /api/admin/hosts/{id} | Moderation | Yes |
 | POST /api/track · GET /api/stats | Analytics | No · Yes |
-| GET/PUT /api/files/{name} · POST /api/files/{name}/restore | Advanced editing | Yes |
+| GET/PUT /api/files/{name} · POST /api/files/{name}/restore | Advanced editing (own server only) | Yes |
 | GET /sitemap.xml, /robots.txt | Search engines | No |
 
 ## Photo credits

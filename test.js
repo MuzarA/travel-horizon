@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /* Nomad Horizon — acceptance checks (ТЗ v2, section 12).
-   Starts its own server on a spare port with a temporary data folder, runs the checks, stops it.
-   Usage: node test.js */
+   Creates a temporary PostgreSQL database, starts its own server on a spare port, runs the checks,
+   then drops the database.
+   Usage: TEST_DATABASE_URL=postgres://user:pass@localhost:5432/postgres node test.js
+   (the user must be allowed to create databases). */
 'use strict';
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -13,6 +15,11 @@ const PORT = 4300 + Math.floor(Math.random() * 500);
 const BASE = 'http://127.0.0.1:' + PORT;
 const PASSWORD = 'test-password-123';
 const DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'th-test-'));
+const { createDb } = require('./lib/pg');
+const ADMIN_URL = process.env.TEST_DATABASE_URL;
+if (!ADMIN_URL) { console.error('Set TEST_DATABASE_URL to a PostgreSQL server where the user can create databases.'); process.exit(1); }
+const TEST_DB = 'nomad_test_' + Date.now().toString(36);
+const DB_URL = (() => { const u = new URL(ADMIN_URL); u.pathname = '/' + TEST_DB; return u.toString(); })();
 let passed = 0, failed = 0;
 
 function check(name, ok, detail) {
@@ -65,15 +72,37 @@ async function main() {
       TH.before[lang].length === TH.before.en.length && Object.keys(TH.places[lang]).length === 10);
   }
 
-  console.log('\nServer');
-  const server = spawn(process.execPath, [path.join(__dirname, 'server.js')], {
-    env: Object.assign({}, process.env, { PORT: String(PORT), HOST: '127.0.0.1', DATA_DIR: DATA, ADMIN_PASSWORD: PASSWORD, LOGIN_BLOCK_SECONDS: '2', TELEGRAM_BOT_TOKEN: '', TELEGRAM_CHAT_ID: '' }),
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
-  let log = ''; server.stdout.on('data', (d) => { log += d; }); server.stderr.on('data', (d) => { log += d; });
-  for (let i = 0; i < 50; i++) { try { const h = await call('GET', '/api/health'); if (h.status === 200) break; } catch (e) { /* not up yet */ } await sleep(100); }
+  const admin = createDb(ADMIN_URL);
+  await admin.query('CREATE DATABASE ' + TEST_DB);
+  const db = createDb(DB_URL);
+  let log = '', server = null;
+  async function startServer(databaseUrl) {
+    server = spawn(process.execPath, [path.join(__dirname, 'server.js')], {
+      env: Object.assign({}, process.env, { PORT: String(PORT), HOST: '127.0.0.1', DATA_DIR: DATA, DATABASE_URL: databaseUrl, POSTGRES_URL: '', ADMIN_PASSWORD: PASSWORD, LOGIN_BLOCK_SECONDS: '2', TELEGRAM_BOT_TOKEN: '', TELEGRAM_CHAT_ID: '', VERCEL: '' }),
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    server.stdout.on('data', (d) => { log += d; }); server.stderr.on('data', (d) => { log += d; });
+    for (let i = 0; i < 80; i++) { try { const h = await call('GET', '/api/health'); if (h.status === 200) return h.json; } catch (e) { /* not up yet */ } await sleep(100); }
+    throw new Error('server did not start');
+  }
+  async function stopServer() { if (!server) return; const s = server; server = null; const gone = new Promise((r) => s.once('exit', r)); s.kill('SIGTERM'); await gone; }
 
   try {
+    console.log('\nWithout a database');
+    const h0 = await startServer('');
+    check('the server starts without DATABASE_URL and says so', h0.database === 'not_configured');
+    check('the public site and content still work', (await call('GET', '/')).status === 200 && !!(await call('GET', '/api/content')).json.hero);
+    check('admin login reports that the database is not connected', (await call('POST', '/api/login', { password: PASSWORD })).json.error === 'database_not_configured');
+    const noDbReq = await call('POST', '/api/requests', { kind: 'general', name: 'N', contact: 'n@n.io' });
+    check('without a database and Telegram a request is not silently lost', noDbReq.status === 502 && noDbReq.json.error === 'delivery_failed');
+    await stopServer();
+
+    console.log('\nServer and database');
+    const h1 = await startServer(DB_URL);
+    check('the server connects to PostgreSQL', h1.database === 'connected', JSON.stringify(h1));
+    const tables = (await db.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY 1")).rows.map((r) => r.table_name).join(',');
+    check('all 8 tables are created', tables === 'audit_log,hosts,login_attempts,requests,sessions,settings,stats_daily,uploads', tables);
+    check('the Vercel route form /api?__path=… reaches the API', (await call('GET', '/api?__path=/api/health')).json.database === 'connected');
     const home = await call('GET', '/');
     check('home page is served with a Content Security Policy', home.status === 200 && /default-src 'self'/.test(home.headers.get('content-security-policy') || ''));
     check('robots.txt and sitemap.xml exist', (await call('GET', '/robots.txt')).status === 200 && /<urlset/.test((await call('GET', '/sitemap.xml')).text));
@@ -118,8 +147,8 @@ async function main() {
     const served = up.json ? await call('GET', up.json.url) : { status: 0, headers: new Map() };
     check('the uploaded photo is served as an image', served.status === 200 && served.headers.get('content-type') === 'image/png');
     check('a text file pretending to be a JPEG is rejected', (await call('POST', '/api/uploads', Buffer.from('<script>alert(1)</script>'), { headers: { 'Content-Type': 'image/jpeg' } })).status === 415);
-    const big = Buffer.alloc(8 * 1024 * 1024 + 10, 0); png.copy(big);
-    check('a file over 8 MB is rejected', (await call('POST', '/api/uploads', big, { headers: { 'Content-Type': 'image/png' } })).status === 413);
+    const big = Buffer.alloc(4 * 1024 * 1024 + 10, 0); png.copy(big);
+    check('a file over 4 MB is rejected', (await call('POST', '/api/uploads', big, { headers: { 'Content-Type': 'image/png' } })).status === 413);
     check('a GIF type is rejected', (await call('POST', '/api/uploads', png, { headers: { 'Content-Type': 'image/gif' } })).status === 415);
 
     console.log('\nRequests (AC-05)');
@@ -171,16 +200,33 @@ async function main() {
     check('only index.html, styles.css, script.js are editable', files === 'index.html,styles.css,script.js');
     check('other files cannot be read through the files API', (await call('GET', '/api/files/server.js')).status === 404);
 
+    console.log('\nData survives a restart');
+    await stopServer();
+    await startServer(DB_URL);
+    const afterRestart = (await call('GET', '/api/requests')).json;
+    check('after a restart the admin is still signed in (sessions are in the database)', !!afterRestart && Array.isArray(afterRestart.requests));
+    check('after a restart requests, texts and photos are still there',
+      afterRestart.requests.some((r) => r.name === 'Anna' && r.status === 'progress') &&
+      (await call('GET', '/api/content')).json.hero.titleLine === 'Where the rivers' && (await call('GET', up.json.url)).status === 200);
+    const row = (await db.query("SELECT name, contact, group_size, idea, status FROM requests WHERE name = 'Anna'")).rows[0];
+    check('the request is a real row in the requests table', !!row && row.group_size === 2 && row.idea === 'lakes-5' && row.status === 'progress', JSON.stringify(row));
+    const hostRow = (await db.query("SELECT status, languages FROM hosts WHERE name = 'Test Host'")).rows[0];
+    check('the host application is a real row in the hosts table', !!hostRow && hostRow.status === 'rejected' && hostRow.languages.join() === 'ky,en');
+
     console.log('\nSign out');
     await call('POST', '/api/logout');
     check('after sign out the admin API is closed', (await call('GET', '/api/requests')).status === 401);
-    const audit = fs.readFileSync(path.join(DATA, 'audit.log'), 'utf8');
-    check('admin actions are written to the audit log', /content\.save/.test(audit) && /login\.blocked/.test(audit) && /host\.update/.test(audit));
+    const audit = (await db.query('SELECT action FROM audit_log')).rows.map((r) => r.action).join(' ');
+    check('admin actions are written to the audit_log table', /content\.save/.test(audit) && /login\.blocked/.test(audit) && /host\.update/.test(audit) && /logout/.test(audit));
+    const sessions = (await db.query('SELECT token_hash FROM sessions')).rows;
+    check('session tokens are stored only as hashes, and sign out removes them', sessions.length === 0);
   } catch (e) {
     failed++; console.log('  ✗ test run crashed: ' + e.stack);
   } finally {
-    server.kill('SIGTERM');
-    await sleep(200);
+    await stopServer().catch(() => {});
+    await db.end();
+    await admin.query('DROP DATABASE IF EXISTS ' + TEST_DB).catch((e) => console.log('could not drop test database: ' + e.message));
+    await admin.end();
     fs.rmSync(DATA, { recursive: true, force: true });
   }
   console.log('\n' + passed + ' passed, ' + failed + ' failed\n');

@@ -4,6 +4,21 @@
   "buildCommand": "",
   "installCommand": "",
   "outputDirectory": "public",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "{lib/**,db/**,public/translations.js,public/catalog.js}",
+      "maxDuration": 15
+    }
+  },
+  "redirects": [
+    { "source": "/admin", "destination": "/admin/", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api?__path=/api/$1" },
+    { "source": "/uploads/(.*)", "destination": "/api?__path=/uploads/$1" },
+    { "source": "/sitemap.xml", "destination": "/api?__path=/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/api?__path=/robots.txt" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -13,6 +28,10 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" }
       ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Cache-Control", "value": "no-cache" } ]
     }
   ]
 }
