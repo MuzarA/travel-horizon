@@ -1,0 +1,952 @@
+openapi: 3.0.3
+info:
+  title: Nomad Horizon API
+  version: 3.0.0
+  description: |
+    REST API of **Nomad Horizon**, a travel website for foreign tourists visiting Kyrgyzstan
+    (trip planner, trip requests, P2P local hosts, admin panel).
+
+    * Backend: Node.js (no dependencies), deployed on Vercel as a serverless function.
+    * Database: PostgreSQL (Neon). Without `DATABASE_URL` the public forms still work
+      and are delivered to Telegram; routes that need the database return `503`.
+    * Every request and host application is saved to the database and duplicated to a Telegram bot.
+
+    **Authentication.** `POST /api/login` sets the `th_admin` cookie (HttpOnly, SameSite=Strict, 12 h).
+    Routes with the lock icon need this cookie.
+
+    **Request rules.** For every non-GET call to `/api/…` the `Origin` header (if present) must match the site host,
+    otherwise `403 bad_origin`. The body must be `application/json` (except `/api/track`,
+    `/api/uploads`, `/api/logout`), otherwise `415 json_required`.
+
+    **Errors** are JSON: `{"error": "<code>", ...extra}`.
+  contact:
+    name: Aliiaskarov Muzar
+    url: https://github.com/MuzarA/travel-horizon
+servers:
+  - url: https://travel-horizon-tawny.vercel.app
+    description: Production (Vercel)
+  - url: http://127.0.0.1:4173
+    description: Local (node server.js)
+tags:
+  - name: system
+    description: Service status
+  - name: content
+    description: Texts, images and contacts shown on the site
+  - name: auth
+    description: Admin login and session
+  - name: requests
+    description: Trip requests from tourists
+  - name: hosts
+    description: P2P local hosts (guides, yurt families, drivers, craftspeople)
+  - name: analytics
+    description: Anonymous event tracking and goal statistics
+  - name: uploads
+    description: Images stored in the database
+  - name: files
+    description: Editing site files (local server only, not available on Vercel)
+
+paths:
+  /api/health:
+    get:
+      tags: [system]
+      summary: Check service health
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /api/content:
+    get:
+      tags: [content]
+      summary: Get site content
+      description: Returns all editable texts and images for all languages. Without a database returns built-in defaults.
+      operationId: getContent
+      responses:
+        '200':
+          description: Site content
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SiteContent' }
+    put:
+      tags: [content]
+      summary: Update site content for one language
+      description: For `en` the fields `hero.titleLine`, `hero.titleEmphasis`, `journeys[].title` and `land.titleLine` are required. For `ky`/`ru` only locale texts are stored.
+      operationId: updateContent
+      security: [ { adminCookie: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContentUpdate' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  updatedAt: { type: string, format: date-time }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/contacts:
+    put:
+      tags: [content]
+      summary: Update company contacts
+      operationId: updateContacts
+      security: [ { adminCookie: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Contacts' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/login:
+    post:
+      tags: [auth]
+      summary: Log in to the admin panel
+      description: After 5 failed attempts from one IP, login is blocked for 15 minutes.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1, maxLength: 200, example: 'your-admin-password' }
+      responses:
+        '200':
+          description: Logged in. Sets the `th_admin` cookie.
+          headers:
+            Set-Cookie:
+              schema: { type: string, example: 'th_admin=3f9a…; HttpOnly; SameSite=Strict; Path=/; Secure' }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  expiresInSeconds: { type: integer, example: 43200 }
+        '401':
+          description: Wrong password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: wrong_password }
+                  attemptsLeft: { type: integer, example: 3 }
+        '429':
+          description: Too many failed attempts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: blocked }
+                  retryAfterSeconds: { type: integer, example: 900 }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/logout:
+    post:
+      tags: [auth]
+      summary: Log out
+      operationId: logout
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  /api/session:
+    get:
+      tags: [auth]
+      summary: Check current session
+      operationId: getSession
+      responses:
+        '200':
+          description: Session state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated: { type: boolean, example: false }
+                  database: { type: boolean, example: true }
+
+  /api/requests:
+    post:
+      tags: [requests]
+      summary: Send a trip request
+      description: |
+        Public form. Saved to the database and sent to Telegram.
+        Limit: 5 requests per IP per 10 minutes. The `website` field is a honeypot for bots and must stay empty.
+        * `kind=trip` needs `idea`
+        * `kind=place` needs `place`
+        * `kind=host` needs `hostId` of an approved host
+      operationId: createRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewRequest' }
+      responses:
+        '201':
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  id: { type: string, example: 'r-m3k9x2-7fa1' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '429': { $ref: '#/components/responses/TooMany' }
+        '502': { $ref: '#/components/responses/DeliveryFailed' }
+    get:
+      tags: [requests]
+      summary: List requests
+      description: Returns the 500 newest requests.
+      operationId: listRequests
+      security: [ { adminCookie: [] } ]
+      responses:
+        '200':
+          description: Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items: { $ref: '#/components/schemas/TripRequest' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/requests/{requestId}:
+    patch:
+      tags: [requests]
+      summary: Change request status
+      operationId: updateRequestStatus
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/RequestStatus' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  request: { $ref: '#/components/schemas/TripRequest' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/hosts:
+    get:
+      tags: [hosts]
+      summary: List approved hosts
+      description: Public list. Email is never shown; Telegram/WhatsApp only if the host allowed it.
+      operationId: listHosts
+      responses:
+        '200':
+          description: Approved hosts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hosts:
+                    type: array
+                    items: { $ref: '#/components/schemas/PublicHost' }
+
+  /api/hosts/apply:
+    post:
+      tags: [hosts]
+      summary: Apply to become a host
+      description: The application gets status `pending` until an admin approves it. Limit 3 per IP per hour.
+      operationId: applyHost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostApplication' }
+      responses:
+        '201': { $ref: '#/components/responses/Created' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '429': { $ref: '#/components/responses/TooMany' }
+        '502': { $ref: '#/components/responses/DeliveryFailed' }
+
+  /api/admin/hosts:
+    get:
+      tags: [hosts]
+      summary: List all hosts (any status)
+      operationId: listAllHosts
+      security: [ { adminCookie: [] } ]
+      responses:
+        '200':
+          description: All hosts with full contacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hosts:
+                    type: array
+                    items: { $ref: '#/components/schemas/Host' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/admin/hosts/{hostId}:
+    patch:
+      tags: [hosts]
+      summary: Update or approve a host
+      description: Partial update. Same rules as the application form, plus `status`.
+      operationId: updateHost
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  host: { $ref: '#/components/schemas/Host' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [hosts]
+      summary: Delete a host
+      operationId: deleteHost
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/track:
+    post:
+      tags: [analytics]
+      summary: Record an anonymous event
+      description: No cookies, no personal data. Unknown events and invalid JSON are ignored. Limit 300 per IP per hour.
+      operationId: trackEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event]
+              properties:
+                event:
+                  type: string
+                  enum: [visit, planner_seen, planner_result, request_open, contact_click]
+                  example: visit
+      responses:
+        '204':
+          description: Always returned, no body
+
+  /api/stats:
+    get:
+      tags: [analytics]
+      summary: Get statistics and goal progress
+      description: Last 30 days of events and progress toward the goals from the business plan (G1, G2, G5, G6).
+      operationId: getStats
+      security: [ { adminCookie: [] } ]
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Stats' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '503': { $ref: '#/components/responses/NoDatabase' }
+
+  /api/uploads:
+    post:
+      tags: [uploads]
+      summary: Upload an image
+      description: Raw binary body, max 4 MB. The type is checked by file signature (magic bytes).
+      operationId: uploadImage
+      security: [ { adminCookie: [] } ]
+      requestBody:
+        required: true
+        content:
+          image/jpeg:
+            schema: { type: string, format: binary }
+          image/png:
+            schema: { type: string, format: binary }
+          image/webp:
+            schema: { type: string, format: binary }
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url: { type: string, example: '/uploads/65a1f0c2b9e4d7a3c8f1e2d4.jpg' }
+                  size: { type: integer, example: 482113 }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '415':
+          description: Not a JPEG/PNG/WebP image
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: not_an_image }
+
+  /uploads/{fileName}:
+    get:
+      tags: [uploads]
+      summary: Get an uploaded image
+      operationId: getUpload
+      parameters:
+        - name: fileName
+          in: path
+          required: true
+          description: 24 hex characters and an extension
+          schema: { type: string, pattern: '^[a-f0-9]{24}\.(jpg|png|webp)$', example: '65a1f0c2b9e4d7a3c8f1e2d4.jpg' }
+      responses:
+        '200':
+          description: Image (cached for one year)
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/webp: { schema: { type: string, format: binary } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/files:
+    get:
+      tags: [files]
+      summary: List editable site files
+      description: Local server only. On Vercel returns `501 not_available_on_vercel`.
+      operationId: listFiles
+      security: [ { adminCookie: [] } ]
+      responses:
+        '200':
+          description: Files
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { $ref: '#/components/schemas/EditableFile' }
+                        size: { type: integer, example: 18234 }
+                        updatedAt: { type: string, format: date-time }
+                        backups: { type: integer, example: 2 }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '501': { $ref: '#/components/responses/NotOnVercel' }
+
+  /api/files/{fileName}:
+    get:
+      tags: [files]
+      summary: Read a site file
+      operationId: getFile
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/FileName'
+      responses:
+        '200':
+          description: File content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name: { $ref: '#/components/schemas/EditableFile' }
+                  content: { type: string }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotOnVercel' }
+    put:
+      tags: [files]
+      summary: Save a site file
+      description: A `.bak` backup is made first, then the file is written atomically.
+      operationId: saveFile
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/FileName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string, minLength: 1, maxLength: 1048576 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/Invalid' }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501': { $ref: '#/components/responses/NotOnVercel' }
+
+  /api/files/{fileName}/restore:
+    post:
+      tags: [files]
+      summary: Restore the latest backup of a file
+      operationId: restoreFile
+      security: [ { adminCookie: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/FileName'
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  restored: { type: string, example: 'styles.css' }
+                  backupsLeft: { type: integer, example: 1 }
+        '401': { $ref: '#/components/responses/LoginRequired' }
+        '404':
+          description: No backup
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: no_backup }
+        '501': { $ref: '#/components/responses/NotOnVercel' }
+
+components:
+  securitySchemes:
+    adminCookie:
+      type: apiKey
+      in: cookie
+      name: th_admin
+      description: Session cookie set by `POST /api/login`. 64 hex characters, valid 12 hours.
+
+  parameters:
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9-]+$', example: 'r-m3k9x2-7fa1' }
+    HostId:
+      name: hostId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9-]+$', example: 'h-aigul-yurt' }
+    FileName:
+      name: fileName
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/EditableFile' }
+
+  responses:
+    Ok:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ok: { type: boolean, example: true }
+    Created:
+      description: Created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ok: { type: boolean, example: true }
+    Invalid:
+      description: Validation failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: invalid, fields: [name, contact] }
+    LoginRequired:
+      description: Admin session required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: login_required }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: not_found }
+    TooMany:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: too_many }
+    TooLarge:
+      description: Body too large
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: too_large }
+    DeliveryFailed:
+      description: No database and the Telegram message could not be sent
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: delivery_failed, telegram: false }
+    NoDatabase:
+      description: Database not configured or unreachable
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: database_not_configured }
+    NotOnVercel:
+      description: File editing is not available on Vercel
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: not_available_on_vercel }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string, example: invalid }
+        fields:
+          type: array
+          items: { type: string }
+
+    Health:
+      type: object
+      properties:
+        ok: { type: boolean, example: true }
+        version: { type: string, example: '3.0.0' }
+        database: { type: string, enum: [connected, not_configured, unreachable] }
+        telegram: { type: boolean, example: true }
+        hosting: { type: string, enum: [vercel, node] }
+
+    Lang:
+      type: string
+      enum: [en, ky, ru]
+      example: en
+    Destination:
+      type: string
+      description: Destination slug from the catalog
+      enum: [issyk-kul, ala-archa, sary-chelek, song-kul, karakol, jeti-oguz, ala-kul, kochkor, tash-rabat, arslanbob]
+    TripIdea:
+      type: string
+      description: Trip planner idea, `mood-days`
+      enum: [lakes-3, lakes-5, lakes-7, trails-3, trails-5, trails-7, culture-3, culture-5, culture-7]
+    RequestStatus:
+      type: string
+      enum: [new, progress, done]
+      example: progress
+    HostStatus:
+      type: string
+      enum: [pending, approved, rejected]
+    HostType:
+      type: string
+      enum: [guide, yurt, driver, horse, craft, food]
+    Region:
+      type: string
+      enum: [bishkek, chuy, issykkul, naryn, jalalabad, osh, talas, batken]
+    SpokenLanguage:
+      type: string
+      enum: [en, ky, ru, de, fr, zh, tr, ko, ja, es]
+    EditableFile:
+      type: string
+      enum: [index.html, styles.css, script.js]
+
+    NewRequest:
+      type: object
+      required: [kind, name, contact]
+      properties:
+        kind: { type: string, enum: [trip, place, host, general], example: trip }
+        name: { type: string, maxLength: 80, example: 'Anna Schmidt' }
+        contact: { type: string, minLength: 3, maxLength: 120, example: 'anna@example.com' }
+        country: { type: string, maxLength: 60, example: Germany }
+        month: { type: string, maxLength: 40, example: July }
+        group: { type: integer, minimum: 1, maximum: 99, example: 2 }
+        note: { type: string, maxLength: 800, example: 'We would like to sleep in a yurt at Song-Kul.' }
+        lang: { $ref: '#/components/schemas/Lang' }
+        page: { type: string, maxLength: 100, example: '#planner' }
+        idea: { $ref: '#/components/schemas/TripIdea' }
+        place: { $ref: '#/components/schemas/Destination' }
+        hostId: { type: string, description: 'ID of an approved host (for kind=host)' }
+        website: { type: string, description: 'Honeypot. Leave empty.', example: '' }
+      example:
+        kind: trip
+        name: Anna Schmidt
+        contact: anna@example.com
+        country: Germany
+        month: July
+        group: 2
+        note: We would like to sleep in a yurt at Song-Kul.
+        lang: en
+        page: '#planner'
+        idea: lakes-5
+
+    TripRequest:
+      type: object
+      properties:
+        id: { type: string, example: 'r-m3k9x2-7fa1' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        firstResponseAt: { type: string, format: date-time, nullable: true }
+        status: { $ref: '#/components/schemas/RequestStatus' }
+        kind: { type: string, enum: [trip, place, host, general] }
+        name: { type: string, example: 'Anna Schmidt' }
+        contact: { type: string, example: 'anna@example.com' }
+        country: { type: string, example: Germany }
+        month: { type: string, example: July }
+        group: { type: integer, nullable: true, example: 2 }
+        note: { type: string }
+        idea: { type: string, nullable: true, example: lakes-5 }
+        place: { type: string, nullable: true }
+        hostId: { type: string, nullable: true }
+        hostName: { type: string, nullable: true }
+        lang: { $ref: '#/components/schemas/Lang' }
+        page: { type: string }
+        telegram: { type: boolean, description: 'Delivered to Telegram', example: true }
+
+    HostOffer:
+      type: object
+      required: [title, duration]
+      properties:
+        title: { type: string, maxLength: 120, example: 'Night in a family yurt at Song-Kul' }
+        duration: { type: string, maxLength: 40, example: '2 nights' }
+        priceFrom: { type: number, minimum: 0, maximum: 100000, example: 45 }
+
+    HostContacts:
+      type: object
+      description: At least one contact is required.
+      properties:
+        telegram: { type: string, maxLength: 33, pattern: '^@?[A-Za-z0-9_]{5,32}$', example: aigul_yurt }
+        whatsapp: { type: string, maxLength: 24, pattern: '^\+?[0-9 ()-]{7,22}$', example: '+996 555 123 456' }
+        email: { type: string, maxLength: 120, format: email, example: 'aigul@example.com' }
+
+    HostApplication:
+      type: object
+      required: [name, type, region, languages, about, offer, contacts, consent]
+      properties:
+        name: { type: string, maxLength: 80, example: 'Aigul' }
+        type: { $ref: '#/components/schemas/HostType' }
+        region: { $ref: '#/components/schemas/Region' }
+        languages:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items: { $ref: '#/components/schemas/SpokenLanguage' }
+          example: [ky, ru, en]
+        about: { type: string, minLength: 20, maxLength: 1500, example: 'Our family has kept yurts on the shore of Song-Kul for three generations.' }
+        aboutLang: { $ref: '#/components/schemas/Lang' }
+        offer: { $ref: '#/components/schemas/HostOffer' }
+        contacts: { $ref: '#/components/schemas/HostContacts' }
+        showContacts: { type: boolean, description: 'Show Telegram/WhatsApp publicly', example: true }
+        image: { type: string, maxLength: 600, description: '/uploads/… path or https URL' }
+        consent: { type: boolean, enum: [true], description: 'Must be true' }
+        website: { type: string, description: 'Honeypot. Leave empty.', example: '' }
+
+    HostUpdate:
+      type: object
+      description: Any subset of the application fields plus status.
+      properties:
+        status: { $ref: '#/components/schemas/HostStatus' }
+        name: { type: string, maxLength: 80 }
+        type: { $ref: '#/components/schemas/HostType' }
+        region: { $ref: '#/components/schemas/Region' }
+        languages:
+          type: array
+          items: { $ref: '#/components/schemas/SpokenLanguage' }
+        about: { type: string, minLength: 20, maxLength: 1500 }
+        aboutLang: { $ref: '#/components/schemas/Lang' }
+        offer: { $ref: '#/components/schemas/HostOffer' }
+        contacts: { $ref: '#/components/schemas/HostContacts' }
+        showContacts: { type: boolean }
+        image: { type: string, maxLength: 600 }
+      example: { status: approved }
+
+    PublicHost:
+      type: object
+      properties:
+        id: { type: string, example: 'h-aigul-yurt' }
+        example: { type: boolean, description: 'Demo profile', example: false }
+        name: { type: string, example: Aigul }
+        type: { $ref: '#/components/schemas/HostType' }
+        region: { $ref: '#/components/schemas/Region' }
+        languages:
+          type: array
+          items: { $ref: '#/components/schemas/SpokenLanguage' }
+        about: { type: string }
+        aboutLang: { $ref: '#/components/schemas/Lang' }
+        offer: { $ref: '#/components/schemas/HostOffer' }
+        image: { type: string, nullable: true }
+        showContacts: { type: boolean }
+        contacts:
+          type: object
+          description: Only when showContacts is true. Email is never public.
+          properties:
+            telegram: { type: string }
+            whatsapp: { type: string }
+
+    Host:
+      allOf:
+        - $ref: '#/components/schemas/PublicHost'
+        - type: object
+          properties:
+            status: { $ref: '#/components/schemas/HostStatus' }
+            contacts: { $ref: '#/components/schemas/HostContacts' }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+
+    Contacts:
+      type: object
+      properties:
+        telegram: { type: string, maxLength: 33, example: nomadhorizon }
+        whatsapp: { type: string, maxLength: 24, example: '+996 700 000 000' }
+        email: { type: string, maxLength: 120, format: email, example: 'hello@nomadhorizon.kg' }
+
+    Hero:
+      type: object
+      properties:
+        eyebrow: { type: string, maxLength: 120 }
+        titleLine: { type: string, maxLength: 80 }
+        titleEmphasis: { type: string, maxLength: 80 }
+        copyFirst: { type: string, maxLength: 400 }
+        copySecond: { type: string, maxLength: 400 }
+    Journey:
+      type: object
+      properties:
+        label: { type: string, maxLength: 60 }
+        duration: { type: string, maxLength: 40 }
+        title: { type: string, maxLength: 80 }
+        description: { type: string, maxLength: 500 }
+        alt: { type: string, maxLength: 200 }
+        image: { type: string }
+    Land:
+      type: object
+      properties:
+        titleLine: { type: string, maxLength: 80 }
+        titleEmphasis: { type: string, maxLength: 80 }
+        description: { type: string, maxLength: 1500 }
+        alt: { type: string, maxLength: 200 }
+        caption: { type: string, maxLength: 160 }
+        image: { type: string }
+    DestinationText:
+      type: object
+      properties:
+        name: { type: string, maxLength: 60 }
+        short: { type: string, maxLength: 200 }
+        story: { type: string, maxLength: 1500 }
+        alt: { type: string, maxLength: 200 }
+        image: { type: string }
+
+    SiteContent:
+      type: object
+      properties:
+        version: { type: integer, example: 3 }
+        updatedAt: { type: string, format: date-time }
+        hero: { $ref: '#/components/schemas/Hero' }
+        journeys:
+          type: array
+          items: { $ref: '#/components/schemas/Journey' }
+        land: { $ref: '#/components/schemas/Land' }
+        destinations:
+          type: object
+          description: Keyed by destination slug
+          additionalProperties: { $ref: '#/components/schemas/DestinationText' }
+        contacts: { $ref: '#/components/schemas/Contacts' }
+        locales:
+          type: object
+          description: Texts for ky and ru
+          additionalProperties: { type: object }
+
+    ContentUpdate:
+      type: object
+      required: [lang]
+      properties:
+        lang: { $ref: '#/components/schemas/Lang' }
+        hero: { $ref: '#/components/schemas/Hero' }
+        journeys:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items: { $ref: '#/components/schemas/Journey' }
+        land: { $ref: '#/components/schemas/Land' }
+        destinations:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/DestinationText' }
+
+    Goal:
+      type: object
+      properties:
+        value: { type: number, nullable: true, description: 'null when there are no visits' }
+        target: { type: number }
+
+    Stats:
+      type: object
+      properties:
+        days:
+          type: array
+          description: Last 30 days
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date, example: '2026-11-18' }
+            additionalProperties: { type: integer }
+        totals:
+          type: object
+          additionalProperties: { type: integer }
+          example: { visit: 1240, planner_seen: 530, planner_result: 310, request_sent: 41 }
+        goals:
+          type: object
+          properties:
+            G1: { allOf: [ { $ref: '#/components/schemas/Goal' } ], description: 'Planner seen per visit, target 40%' }
+            G2: { allOf: [ { $ref: '#/components/schemas/Goal' } ], description: 'Planner results per 100 visits, target 25' }
+            G5: { allOf: [ { $ref: '#/components/schemas/Goal' } ], description: 'Requests per 100 visits, target 3' }
+            G6: { allOf: [ { $ref: '#/components/schemas/Goal' } ], description: 'Requests answered within a day, target 90%' }
+        hosts:
+          type: object
+          properties:
+            pending: { type: integer, example: 2 }
+            approved: { type: integer, example: 6 }
+        requests:
+          type: object
+          properties:
+            open: { type: integer, example: 5 }
